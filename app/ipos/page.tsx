@@ -1,7 +1,5 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
 
 interface IPO {
   id: string
@@ -22,31 +20,25 @@ interface IPO {
   status: 'upcoming' | 'open' | 'closed' | 'listed'
 }
 
-export default function IPOsPage() {
-  const [ipos, setIpos] = useState<IPO[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<string>('all')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
+async function getIPOs(status?: string, type?: string): Promise<IPO[]> {
+  const where: any = {}
+  if (status && status !== 'all') where.status = status
+  if (type && type !== 'all') where.type = type
 
-  useEffect(() => {
-    fetchIPOs()
-  }, [filter, typeFilter])
+  return prisma.iPO.findMany({
+    where,
+    orderBy: { srNo: 'asc' }
+  })
+}
 
-  const fetchIPOs = async () => {
-    try {
-      const params = new URLSearchParams()
-      if (filter !== 'all') params.append('status', filter)
-      if (typeFilter !== 'all') params.append('type', typeFilter)
-
-      const response = await fetch(`/api/ipos?${params.toString()}`)
-      const data = await response.json()
-      setIpos(data)
-    } catch (error) {
-      console.error('Error fetching IPOs:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+export default async function IPOsPage({
+  searchParams
+}: {
+  searchParams: { status?: string; type?: string }
+}) {
+  const status = searchParams.status || 'all'
+  const type = searchParams.type || 'all'
+  const ipos = await getIPOs(status, type)
 
   const formatDate = (date: string | null | undefined) => {
     if (!date) return '-'
@@ -77,7 +69,6 @@ export default function IPOsPage() {
     return type === 'mainboard' ? 'bg-orange-100 text-orange-800' : 'bg-cyan-100 text-cyan-800'
   }
 
-  // Calculate listing gain %
   const getListingGainPercent = (listingPrice: number | null | undefined, offerPriceMax: number | null | undefined) => {
     if (!listingPrice || !offerPriceMax) return null
     return ((listingPrice - offerPriceMax) / offerPriceMax) * 100
@@ -110,40 +101,41 @@ export default function IPOsPage() {
           <div className="flex flex-wrap gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">All Status</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
-                <option value="listed">Listed</option>
-              </select>
+              <form>
+                <select
+                  name="status"
+                  defaultValue={status}
+                  className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="upcoming">Upcoming</option>
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                  <option value="listed">Listed</option>
+                </select>
+                <input type="submit" value="Filter" className="hidden" />
+              </form>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Type</label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">All Types</option>
-                <option value="mainboard">Mainboard</option>
-                <option value="sme">SME</option>
-              </select>
+              <form>
+                <select
+                  name="type"
+                  defaultValue={type}
+                  className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Types</option>
+                  <option value="mainboard">Mainboard</option>
+                  <option value="sme">SME</option>
+                </select>
+                <input type="submit" value="Filter" className="hidden" />
+              </form>
             </div>
           </div>
         </div>
 
         {/* IPOs Table */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600"></div>
-            <p className="mt-4 text-slate-600">Loading IPOs...</p>
-          </div>
-        ) : ipos.length === 0 ? (
+        {ipos.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
             <p className="text-slate-500">No IPOs found. Add some in the admin dashboard.</p>
           </div>
