@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// IPO Main Entry
+model IPO {
+  id             String   @id @default(cuid())
+  srNo           Int
+  name           String
+  symbol         String   @unique
+  dateRangeStart DateTime?
+  dateRangeEnd   DateTime?
+  offerPriceMin  Float?
+  offerPriceMax  Float?
+  lotSize        Int?
+  type           String?  // mainboard, sme
+  subscription   Float?
+  listingPrice   Float?
+
+  // New columns for stock price tracking
+  latestPrice    Float?   // Latest stock price from API
+  priceChangePercent Float? // Auto-calculated: ((latestPrice - offerPriceMax) / offerPriceMax) * 100
+  priceUpdatedAt  DateTime? // When was the latest price last updated
+  exchange        String?  // NSE, BSE
+  token          String?  // Trading token for API (optional)
+
+  status         String   @default("upcoming") // upcoming, open, closed, listed
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations for future scalability
+  allocations    IPOAllocation[]
+  watchlist      WatchlistItem[]
+  notifications  Notification[]
+
+  @@map("ipos")
+}
+
+// Price update history log
+model PriceUpdateLog {
+  id        String   @id @default(cuid())
+  ipoId     String
+  symbol    String
+  oldPrice  Float?
+  newPrice  Float?
+  changePercent Float?
+  source    String   // API or manual
+  createdAt DateTime @default(now())
+
+  @@map("price_update_logs")
+}
+
+// User allocations tracking (for future use)
+model IPOAllocation {
+  id          String   @id @default(cuid())
+  ipoId       String
+  sharesApplied Int
+  sharesAllotted Int?
+  amount      Float
+  status      String   // pending, allotted, not_allotted
+  createdAt   DateTime @default(now())
+
+  ipo         IPO      @relation(fields: [ipoId], references: [id], onDelete: Cascade)
+
+  @@map("ipo_allocations")
+}
+
+// User Watchlist
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  ipoId     String
+  createdAt DateTime @default(now())
+
+  ipo       IPO      @relation(fields: [ipoId], references: [id], onDelete: Cascade)
+
+  @@map("watchlist_items")
+}
+
+// Notifications for IPO events
+model Notification {
+  id        String   @id @default(cuid())
+  ipoId     String
+  type      String   // open_soon, closing, listing
+  sentAt    DateTime @default(now())
+  read      Boolean  @default(false)
+
+  ipo       IPO      @relation(fields: [ipoId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}

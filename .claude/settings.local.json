@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(node:*)",
+      "Bash(npm --version:*)",
+      "Bash(npm init -y)",
+      "Bash(npm install:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npx prisma init:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npm run dev)",
+      "Bash(taskkill:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(powershell -Command \"Start-Sleep -Seconds 5; Invoke-WebRequest -Uri ''http://localhost:3002/api/stock-price/update'' -Method POST -ContentType ''application/json''\")",
+      "Bash(powershell:*)"
+    ]
+  }
+}
