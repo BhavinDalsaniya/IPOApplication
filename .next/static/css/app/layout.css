@@ -575,6 +575,9 @@ video {
 .max-w-full {
   max-width: 100%;
 }
+.max-w-\[180px\] {
+  max-width: 180px;
+}
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -629,6 +632,11 @@ video {
 }
 .overflow-x-auto {
   overflow-x: auto;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .whitespace-nowrap {
   white-space: nowrap;
@@ -794,6 +802,10 @@ video {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
+.py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
 .text-left {
   text-align: left;
 }
@@ -830,6 +842,9 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+.text-\[10px\] {
+  font-size: 10px;
 }
 .font-bold {
   font-weight: 700;
@@ -908,6 +923,10 @@ video {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+.text-slate-400 {
+  --tw-text-opacity: 1;
+  color: rgb(148 163 184 / var(--tw-text-opacity, 1));
 }
 .antialiased {
   -webkit-font-smoothing: antialiased;

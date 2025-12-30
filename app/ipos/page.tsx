@@ -42,16 +42,26 @@ export default async function IPOsPage({
 
   const formatDate = (date: string | null | undefined) => {
     if (!date) return '-'
-    return new Date(date).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
+    const d = new Date(date)
+    const day = d.getDate()
+    const month = d.toLocaleDateString('en-IN', { month: 'short' })
+    const year = d.getFullYear().toString().slice(-2) // Last 2 digits of year
+    return `${day} ${month}'${year}`
   }
 
   const formatDateRange = (start: string | null | undefined, end: string | null | undefined) => {
     if (!start && !end) return '-'
-    return `${formatDate(start)} - ${formatDate(end)}`
+    const startDate = formatDate(start)
+    const endDate = formatDate(end)
+    // If year is same, show it only once
+    if (start && end) {
+      const startYear = new Date(start).getFullYear()
+      const endYear = new Date(end).getFullYear()
+      if (startYear === endYear) {
+        return `${startDate} - ${endDate.slice(0, -3)}'${endYear.toString().slice(-2)}`
+      }
+    }
+    return `${startDate} - ${endDate}`
   }
 
   const getStatusColor = (status: string) => {
@@ -144,19 +154,34 @@ export default async function IPOsPage({
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Sr. No</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">IPO Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Symbol</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Date Range</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Offer Price</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Lot Size</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Subscription</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Listing Price</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Listing Gain %</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Latest Stock Price</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Up/Down % from IPO</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-slate-500 uppercase">
+                    <div>Sr</div>
+                    <div className="text-[10px] text-slate-400">No</div>
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase whitespace-nowrap">
+                    <div>IPO</div>
+                    <div className="text-[10px] text-slate-400">Name</div>
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase">Symbol</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase whitespace-nowrap">Date</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase whitespace-nowrap">Offer</th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-slate-500 uppercase whitespace-nowrap">Lot</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase whitespace-nowrap">Type</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-slate-500 uppercase whitespace-nowrap">Sub</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase whitespace-nowrap">List</th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-slate-500 uppercase">
+                    <div>List</div>
+                    <div className="text-[10px] text-slate-400">Gain%</div>
+                  </th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-slate-500 uppercase">
+                    <div>Latest</div>
+                    <div className="text-[10px] text-slate-400">Price</div>
+                  </th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-slate-500 uppercase">
+                    <div>Up/</div>
+                    <div className="text-[10px] text-slate-400">Down%</div>
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
@@ -166,50 +191,50 @@ export default async function IPOsPage({
                   return (
                     <tr key={ipo.id} className="hover:bg-slate-50">
                       {/* Sr. No */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">{ipo.srNo}</td>
+                      <td className="px-3 py-2 whitespace-nowrap text-center text-sm text-slate-900">{ipo.srNo}</td>
 
                       {/* IPO Name */}
-                      <td className="px-4 py-3 text-sm font-medium text-slate-900">{ipo.name}</td>
+                      <td className="px-3 py-2 text-xs font-medium text-slate-900 max-w-[180px] truncate" title={ipo.name}>{ipo.name}</td>
 
                       {/* Symbol */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-600">{ipo.symbol}</td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-slate-600">{ipo.symbol}</td>
 
                       {/* Date Range */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-600">
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-slate-600">
                         {ipo.status === 'upcoming' ? '-' : formatDateRange(ipo.dateRangeStart, ipo.dateRangeEnd)}
                       </td>
 
                       {/* Offer Price */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">
-                        {ipo.offerPriceMin && ipo.offerPriceMax ? `₹${ipo.offerPriceMin} - ₹${ipo.offerPriceMax}` : '-'}
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-slate-900">
+                        {ipo.offerPriceMin && ipo.offerPriceMax ? `₹${ipo.offerPriceMin}${ipo.offerPriceMax !== ipo.offerPriceMin ? `-${ipo.offerPriceMax}` : ''}` : '-'}
                       </td>
 
                       {/* Lot Size */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">
+                      <td className="px-3 py-2 whitespace-nowrap text-center text-sm text-slate-900">
                         {ipo.lotSize ? `${ipo.lotSize}` : '-'}
                       </td>
 
                       {/* Type */}
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         {ipo.type ? (
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(ipo.type)}`}>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getTypeColor(ipo.type)}`}>
                             {ipo.type.toUpperCase()}
                           </span>
                         ) : '-'}
                       </td>
 
                       {/* Subscription */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">
+                      <td className="px-3 py-2 whitespace-nowrap text-right text-sm text-slate-900">
                         {ipo.subscription ? `${ipo.subscription}x` : '-'}
                       </td>
 
                       {/* Listing Price */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-slate-900">
                         {ipo.listingPrice ? `₹${ipo.listingPrice}` : '-'}
                       </td>
 
                       {/* Listing Gain % */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <td className="px-3 py-2 whitespace-nowrap text-center text-sm">
                         {listingGainPercent !== null ? (
                           <span className={listingGainPercent >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                             {listingGainPercent >= 0 ? '+' : ''}{listingGainPercent.toFixed(2)}%
@@ -218,12 +243,12 @@ export default async function IPOsPage({
                       </td>
 
                       {/* Latest Stock Price */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-900">
+                      <td className="px-3 py-2 whitespace-nowrap text-center text-sm font-medium text-slate-900">
                         {ipo.latestPrice ? `₹${ipo.latestPrice.toFixed(2)}` : '-'}
                       </td>
 
                       {/* Up/Down % from IPO Price */}
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <td className="px-3 py-2 whitespace-nowrap text-center text-sm">
                         {ipo.priceChangePercent !== null && ipo.priceChangePercent !== undefined ? (
                           <span className={ipo.priceChangePercent >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                             {ipo.priceChangePercent >= 0 ? '+' : ''}{ipo.priceChangePercent.toFixed(2)}%
@@ -232,8 +257,8 @@ export default async function IPOsPage({
                       </td>
 
                       {/* Status */}
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(ipo.status)}`}>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(ipo.status)}`}>
                           {ipo.status.charAt(0).toUpperCase() + ipo.status.slice(1)}
                         </span>
                       </td>

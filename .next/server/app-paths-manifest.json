@@ -1,4 +1,6 @@
 {
   "/ipos/page": "app/ipos/page.js",
-  "/admin/page": "app/admin/page.js"
+  "/admin/page": "app/admin/page.js",
+  "/api/ipos/route": "app/api/ipos/route.js",
+  "/api/stock-price/update/route": "app/api/stock-price/update/route.js"
 }
