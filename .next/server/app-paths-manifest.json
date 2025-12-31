@@ -1,6 +1,5 @@
 {
-  "/ipos/page": "app/ipos/page.js",
   "/admin/page": "app/admin/page.js",
   "/api/ipos/route": "app/api/ipos/route.js",
-  "/api/ipos/[id]/route": "app/api/ipos/[id]/route.js"
+  "/ipos/page": "app/ipos/page.js"
 }
