@@ -67,7 +67,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
       })
     }
 
-    // Sort by status priority
+    // Sort by status priority, then by date (newest first)
     return filtered.sort((a, b) => {
       const statusOrderA = STATUS_ORDER.indexOf(a.status)
       const statusOrderB = STATUS_ORDER.indexOf(b.status)
@@ -76,6 +76,16 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
         return statusOrderA - statusOrderB
       }
 
+      // Within same status, sort by date (newest first)
+      // Use dateRangeEnd as the primary date, fallback to dateRangeStart
+      const dateA = a.dateRangeEnd || a.dateRangeStart
+      const dateB = b.dateRangeEnd || b.dateRangeStart
+
+      if (dateA && dateB) {
+        return new Date(dateB).getTime() - new Date(dateA).getTime()
+      }
+
+      // If no dates, fall back to srNo
       return a.srNo - b.srNo
     })
   }, [initialIpos, statusFilter, typeFilter, searchQuery, yearFilter])
