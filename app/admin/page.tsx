@@ -9,6 +9,9 @@ export default async function AdminPage() {
   // Serialize Date objects to strings for client component
   const serializedIpos = ipos.map(ipo => ({
     ...ipo,
+    type: ipo.type as 'mainboard' | 'sme' | null,
+    exchange: ipo.exchange as 'NSE' | 'BSE' | null,
+    status: ipo.status as 'upcoming' | 'open' | 'closed' | 'listed',
     dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
     dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
     priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,

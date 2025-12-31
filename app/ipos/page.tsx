@@ -28,6 +28,8 @@ async function getIPOs(): Promise<IPO[]> {
   // Serialize Date objects to strings for client component
   return ipos.map(ipo => ({
     ...ipo,
+    type: ipo.type as 'mainboard' | 'sme' | null,
+    status: ipo.status as 'upcoming' | 'open' | 'closed' | 'listed',
     dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
     dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
     priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,
