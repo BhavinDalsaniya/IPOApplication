@@ -159,9 +159,6 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                 <p className="text-xs text-slate-500">Track. Analyze. Decide.</p>
               </div>
             </Link>
-            <Link href="/admin" className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-violet-600 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300">
-              Admin Dashboard
-            </Link>
           </div>
         </div>
       </header>
