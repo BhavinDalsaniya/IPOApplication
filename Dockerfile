@@ -40,9 +40,15 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/prisma ./prisma
 
-# Copy public folder if it exists
-RUN --mount=type=bind,from=builder,source=/app/public,target=/app-public,copy=false \
-    if [ -d /app-public ]; then mkdir -p ./public && cp -r /app-public/* ./public/; fi
+# Copy public folder if it exists (using shell to handle missing directory)
+RUN mkdir -p ./public-temp && \
+    if [ -d /app/public ]; then \
+        cp -r /app/public/* ./public/ && \
+        echo "Public folder copied"; \
+    else \
+        echo "No public folder found, skipping"; \
+    fi || \
+    (if [ -d /app/public ]; then cp -r /app/public/* ./public/; fi)
 
 USER nextjs
 
