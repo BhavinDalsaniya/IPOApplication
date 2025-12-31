@@ -16,7 +16,8 @@
       "Bash(timeout:*)",
       "Bash(curl:*)",
       "Bash(powershell -Command \"Start-Sleep -Seconds 5; Invoke-WebRequest -Uri ''http://localhost:3002/api/stock-price/update'' -Method POST -ContentType ''application/json''\")",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(dir:*)"
     ]
   }
 }
