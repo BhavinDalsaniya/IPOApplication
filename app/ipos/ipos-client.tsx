@@ -273,53 +273,58 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                   <span className="text-sm font-semibold text-slate-700 mr-1">Status:</span>
                   <button
                     onClick={() => setStatusFilter('all')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       statusFilter === 'all'
                         ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
                     All ({initialIpos.length})
                   </button>
                   <button
                     onClick={() => setStatusFilter('upcoming')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       statusFilter === 'upcoming'
-                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    🔵 Upcoming ({initialIpos.filter(i => i.status === 'upcoming').length})
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                    Upcoming ({initialIpos.filter(i => i.status === 'upcoming').length})
                   </button>
                   <button
                     onClick={() => setStatusFilter('open')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       statusFilter === 'open'
-                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    🟢 Open ({initialIpos.filter(i => i.status === 'open').length})
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    Open ({initialIpos.filter(i => i.status === 'open').length})
                   </button>
                   <button
                     onClick={() => setStatusFilter('closed')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       statusFilter === 'closed'
-                        ? 'bg-gradient-to-r from-slate-400 to-gray-500 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-slate-400 via-gray-500 to-zinc-500 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    ⚪ Closed ({initialIpos.filter(i => i.status === 'closed').length})
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                    Closed ({initialIpos.filter(i => i.status === 'closed').length})
                   </button>
                   <button
                     onClick={() => setStatusFilter('listed')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       statusFilter === 'listed'
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    🟣 Listed ({initialIpos.filter(i => i.status === 'listed').length})
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    Listed ({initialIpos.filter(i => i.status === 'listed').length})
                   </button>
                 </div>
               </div>
