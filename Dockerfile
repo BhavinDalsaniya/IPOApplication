@@ -1,6 +1,6 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl1.1-compat
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -8,12 +8,14 @@ RUN npm ci
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
+RUN apk add --no-cache libc6-compat openssl1.1-compat
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client
+# Generate Prisma Client with OpenSSL support
+ENV OPENSSL_CONF=/etc/ssl/openssl.cnf
 RUN npx prisma generate
 
 # Build Next.js
@@ -22,10 +24,12 @@ RUN npm run build
 
 # Stage 3: Runner
 FROM node:20-alpine AS runner
+RUN apk add --no-cache libc6-compat openssl1.1-compat
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV OPENSSL_CONF=/etc/ssl/openssl.cnf
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -34,6 +38,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/prisma ./prisma
 
 USER nextjs
