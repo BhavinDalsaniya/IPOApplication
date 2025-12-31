@@ -131,12 +131,22 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
 
   const getStatusColor = (status: string) => {
     const colors = {
-      upcoming: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400',
-      open: 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-emerald-400',
-      closed: 'bg-gradient-to-r from-slate-400 to-slate-500 text-white border-slate-300',
-      listed: 'bg-gradient-to-r from-violet-500 to-violet-600 text-white border-violet-400'
+      upcoming: 'relative px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 shadow-lg shadow-blue-500/30 border border-blue-400/50 before:content-[""] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-cyan-400/20 before:via-blue-400/20 before:to-indigo-400/20 before:animate-pulse',
+      open: 'relative px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 shadow-lg shadow-emerald-500/30 border border-emerald-400/50 before:content-[""] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-emerald-400/20 before:via-green-400/20 before:to-teal-400/20 before:animate-pulse',
+      closed: 'relative px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-slate-400 via-gray-500 to-zinc-500 shadow-lg shadow-slate-500/30 border border-slate-400/50 before:content-[""] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-slate-400/20 before:via-gray-400/20 before:to-zinc-400/20 before:animate-pulse',
+      listed: 'relative px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 shadow-lg shadow-violet-500/30 border border-violet-400/50 before:content-[""] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-violet-400/20 before:via-purple-400/20 before:to-fuchsia-400/20 before:animate-pulse'
     }
     return colors[status as keyof typeof colors] || colors.upcoming
+  }
+
+  const getStatusIcon = (status: string) => {
+    const icons = {
+      upcoming: '<svg class="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>',
+      open: '<svg class="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>',
+      closed: '<svg class="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>',
+      listed: '<svg class="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>'
+    }
+    return icons[status as keyof typeof icons] || icons.upcoming
   }
 
   const getTypeColor = (type: string | null) => {
@@ -580,11 +590,8 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
 
                         {/* Status */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm border ${getStatusColor(ipo.status)}`}>
-                            {ipo.status === 'upcoming' && '🔵 '}
-                            {ipo.status === 'open' && '🟢 '}
-                            {ipo.status === 'closed' && '⚪ '}
-                            {ipo.status === 'listed' && '🟣 '}
+                          <span className={`inline-flex items-center overflow-hidden ${getStatusColor(ipo.status)}`}>
+                            <span dangerouslySetInnerHTML={{ __html: getStatusIcon(ipo.status) }} />
                             {ipo.status.charAt(0).toUpperCase() + ipo.status.slice(1)}
                           </span>
                         </td>
