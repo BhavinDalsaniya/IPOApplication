@@ -23,6 +23,8 @@ model IPO {
   lotSize        Int?
   type           String?  // mainboard, sme
   subscription   Float?
+  gmp            Float?   // Grey Market Premium value
+  gmpPercent     Float?   // Grey Market Premium percentage
   listingPrice   Float?
 
   // New columns for stock price tracking

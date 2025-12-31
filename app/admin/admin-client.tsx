@@ -15,6 +15,8 @@ interface IPO {
   lotSize?: number | null
   type?: 'mainboard' | 'sme' | null
   subscription?: number | null
+  gmp?: number | null
+  gmpPercent?: number | null
   listingPrice?: number | null
   latestPrice?: number | null
   priceChangePercent?: number | null
@@ -43,6 +45,8 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
     lotSize: '',
     type: '',
     subscription: '',
+    gmp: '',
+    gmpPercent: '',
     listingPrice: '',
     exchange: '',
     token: '',
@@ -114,6 +118,8 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
       lotSize: ipo.lotSize?.toString() || '',
       type: ipo.type || '',
       subscription: ipo.subscription?.toString() || '',
+      gmp: ipo.gmp?.toString() || '',
+      gmpPercent: ipo.gmpPercent?.toString() || '',
       listingPrice: ipo.listingPrice?.toString() || '',
       exchange: ipo.exchange || '',
       token: ipo.token || '',
@@ -159,6 +165,8 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
       lotSize: '',
       type: '',
       subscription: '',
+      gmp: '',
+      gmpPercent: '',
       listingPrice: '',
       exchange: '',
       token: '',
@@ -355,6 +363,28 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                   placeholder="e.g., 5.21"
                   value={formData.subscription}
                   onChange={(e) => setFormData({ ...formData, subscription: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">GMP (Optional)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 120"
+                  value={formData.gmp}
+                  onChange={(e) => setFormData({ ...formData, gmp: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">GMP % (Optional)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 5.26"
+                  value={formData.gmpPercent}
+                  onChange={(e) => setFormData({ ...formData, gmpPercent: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

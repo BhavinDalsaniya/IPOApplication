@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
         lotSize: body.lotSize ? parseInt(body.lotSize) : null,
         type: body.type || null,
         subscription: body.subscription ? parseFloat(body.subscription) : null,
+        gmp: body.gmp ? parseFloat(body.gmp) : null,
+        gmpPercent: body.gmpPercent ? parseFloat(body.gmpPercent) : null,
         listingPrice: body.listingPrice ? parseFloat(body.listingPrice) : null,
         exchange: body.exchange || null,
         token: body.token || null,

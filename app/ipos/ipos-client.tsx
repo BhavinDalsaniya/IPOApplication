@@ -15,6 +15,8 @@ interface IPO {
   lotSize: number | null
   type: 'mainboard' | 'sme' | null
   subscription: number | null
+  gmp: number | null
+  gmpPercent: number | null
   listingPrice: number | null
   latestPrice: number | null
   priceChangePercent: number | null
@@ -341,6 +343,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Lot</th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Type</th>
                     <th className="px-4 py-3 text-right text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Sub</th>
+                    <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">GMP</th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">List</th>
                     <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
                       <div>List</div>
@@ -440,6 +443,26 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                             </span>
                           ) : (
                             <span className="text-slate-400 text-xs">TBD</span>
+                          )}
+                        </td>
+
+                        {/* GMP */}
+                        <td className="px-4 py-3 whitespace-nowrap text-center text-sm">
+                          {ipo.status === 'listed' ? (
+                            <span className="text-slate-400 text-xs">N/A</span>
+                          ) : ipo.gmp !== null && ipo.gmp !== undefined ? (
+                            <span className={`inline-flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-bold ${
+                              (ipo.gmpPercent || 0) >= 0
+                                ? 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-300'
+                                : 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-300'
+                            }`}>
+                              <span className="leading-tight">↑ ₹{ipo.gmp}</span>
+                              {ipo.gmpPercent !== null && ipo.gmpPercent !== undefined && (
+                                <span className="text-[10px] leading-tight">({ipo.gmpPercent.toFixed(2)}%)</span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-xs">—</span>
                           )}
                         </td>
 

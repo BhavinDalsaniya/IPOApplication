@@ -18,6 +18,8 @@ export default async function AdminPage() {
     dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
     dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
     priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,
+    gmp: (ipo as any).gmp || null,
+    gmpPercent: (ipo as any).gmpPercent || null,
     createdAt: ipo.createdAt.toISOString(),
     updatedAt: ipo.updatedAt.toISOString(),
   }))

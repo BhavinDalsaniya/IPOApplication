@@ -13,6 +13,8 @@ interface IPO {
   lotSize: number | null
   type: 'mainboard' | 'sme' | null
   subscription: number | null
+  gmp: number | null
+  gmpPercent: number | null
   listingPrice: number | null
   latestPrice: number | null
   priceChangePercent: number | null
@@ -33,6 +35,8 @@ async function getIPOs(): Promise<IPO[]> {
     dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
     dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
     priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,
+    gmp: (ipo as any).gmp || null,
+    gmpPercent: (ipo as any).gmpPercent || null,
   }))
 }
 

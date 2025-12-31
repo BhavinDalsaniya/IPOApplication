@@ -95,6 +95,12 @@ export async function PUT(
     if (body.subscription !== undefined) {
       updateData.subscription = body.subscription ? parseFloat(body.subscription) : null
     }
+    if (body.gmp !== undefined) {
+      updateData.gmp = body.gmp ? parseFloat(body.gmp) : null
+    }
+    if (body.gmpPercent !== undefined) {
+      updateData.gmpPercent = body.gmpPercent ? parseFloat(body.gmpPercent) : null
+    }
     if (body.listingPrice !== undefined) {
       updateData.listingPrice = body.listingPrice ? parseFloat(body.listingPrice) : null
     }
