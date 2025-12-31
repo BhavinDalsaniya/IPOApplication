@@ -84,11 +84,12 @@ export async function POST(request: NextRequest) {
         // Small delay between requests to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 500))
       } catch (error) {
-        console.error(`Error updating ${ipo.symbol}:`, error.message)
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`Error updating ${ipo.symbol}:`, errorMsg)
         results.push({
           symbol: ipo.symbol,
           status: 'error',
-          error: error.message
+          error: errorMsg
         })
       }
     }
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error updating stock prices:', error)
     return NextResponse.json(
-      { error: 'Failed to update stock prices', details: error.message },
+      { error: 'Failed to update stock prices', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

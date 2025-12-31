@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating IPO:', error)
     return NextResponse.json(
-      { error: 'Failed to create IPO', details: error.message },
+      { error: 'Failed to create IPO', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     console.error('Test API error:', error)
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: 'Server error while fetching price'
     }, { status: 500 })
   }

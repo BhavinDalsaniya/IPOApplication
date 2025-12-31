@@ -120,7 +120,7 @@ export async function PUT(
   } catch (error) {
     console.error('Error updating IPO:', error)
     return NextResponse.json(
-      { error: 'Failed to update IPO', details: error.message },
+      { error: 'Failed to update IPO', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
