@@ -207,16 +207,16 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
             </h3>
 
             {/* Status Notice */}
-            {currentStatus === 'upcoming' && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <strong>Upcoming IPO:</strong> Only IPO Name and Symbol are required. Other fields will be filled when IPO opens.
-              </div>
-            )}
             {currentStatus === 'listed' && (
               <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg text-sm text-purple-800">
                 <strong>Listed IPO:</strong> Latest price will be fetched from API automatically. Click "Update Prices" button to refresh.
               </div>
             )}
+
+            {/* General Notice */}
+            <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600">
+              <strong>Tip:</strong> Only fields marked with * are required. Fill in whatever information you have, leave the rest blank and update later.
+            </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Always Required */}
@@ -241,108 +241,111 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Symbol *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Symbol {currentStatus === 'listed' ? '*' : '(Optional)'}
+                </label>
                 <input
                   type="text"
-                  required
+                  required={currentStatus === 'listed'}
                   value={formData.symbol}
                   onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
+                  placeholder={currentStatus === 'listed' ? 'e.g., RELIANCE' : 'Add when listed'}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                {currentStatus !== 'listed' && (
+                  <p className="text-xs text-slate-500 mt-1">Leave blank if not known yet</p>
+                )}
+              </div>
+
+              {/* Always visible fields: Type and Exchange */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Type (Optional)</label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select type...</option>
+                  <option value="mainboard">Mainboard</option>
+                  <option value="sme">SME</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Exchange (Optional)</label>
+                <select
+                  value={formData.exchange}
+                  onChange={(e) => setFormData({ ...formData, exchange: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select exchange...</option>
+                  <option value="NSE">NSE</option>
+                  <option value="BSE">BSE</option>
+                </select>
+              </div>
+
+              {/* Optional Fields - Always visible */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Date Range (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="Dec 22 - Dec 24, 2025"
+                  value={formData.dateRange}
+                  onChange={(e) => setFormData({ ...formData, dateRange: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Offer Price (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="108-114"
+                  value={formData.offerPrice}
+                  onChange={(e) => setFormData({ ...formData, offerPrice: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Lot Size (Optional)</label>
+                <input
+                  type="number"
+                  placeholder="e.g., 600"
+                  value={formData.lotSize}
+                  onChange={(e) => setFormData({ ...formData, lotSize: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Subscription (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g., 5.21"
+                  value={formData.subscription}
+                  onChange={(e) => setFormData({ ...formData, subscription: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Listing Price (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g., 120"
+                  value={formData.listingPrice}
+                  onChange={(e) => setFormData({ ...formData, listingPrice: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
-              {/* Live/Open Fields */}
-              {currentStatus !== 'upcoming' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Date Range</label>
-                    <input
-                      type="text"
-                      placeholder="Dec 22 - Dec 24, 2025"
-                      value={formData.dateRange}
-                      onChange={(e) => setFormData({ ...formData, dateRange: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Offer Price</label>
-                    <input
-                      type="text"
-                      placeholder="108-114"
-                      value={formData.offerPrice}
-                      onChange={(e) => setFormData({ ...formData, offerPrice: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Lot Size</label>
-                    <input
-                      type="number"
-                      value={formData.lotSize}
-                      onChange={(e) => setFormData({ ...formData, lotSize: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
-                    <select
-                      value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="mainboard">Mainboard</option>
-                      <option value="sme">SME</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Subscription</label>
-                    <input
-                      type="text"
-                      placeholder="5.21"
-                      value={formData.subscription}
-                      onChange={(e) => setFormData({ ...formData, subscription: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Listing Price</label>
-                    <input
-                      type="text"
-                      placeholder="120"
-                      value={formData.listingPrice}
-                      onChange={(e) => setFormData({ ...formData, listingPrice: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Listed Fields */}
-              {currentStatus === 'listed' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Exchange</label>
-                    <select
-                      value={formData.exchange}
-                      onChange={(e) => setFormData({ ...formData, exchange: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="NSE">NSE</option>
-                      <option value="BSE">BSE</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">API Token (Optional)</label>
-                    <input
-                      type="text"
-                      placeholder="Trading token"
-                      value={formData.token}
-                      onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </>
-              )}
+              {/* API Token - Always visible but optional */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">API Token (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="Trading token"
+                  value={formData.token}
+                  onChange={(e) => setFormData({ ...formData, token: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
 
               {/* Common Fields */}
               <div>
@@ -406,7 +409,7 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                 <tr key={ipo.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">{ipo.srNo}</td>
                   <td className="px-4 py-3 text-sm font-medium text-slate-900">{ipo.name}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-500">{ipo.symbol}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-500">{ipo.symbol || <span className="text-slate-400 italic">TBD</span>}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">
                     {ipo.offerPriceMin && ipo.offerPriceMax
                       ? `₹${ipo.offerPriceMin} - ₹${ipo.offerPriceMax}`

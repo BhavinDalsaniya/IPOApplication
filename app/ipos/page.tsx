@@ -20,14 +20,29 @@ interface IPO {
   status: 'upcoming' | 'open' | 'closed' | 'listed'
 }
 
+const STATUS_ORDER = ['upcoming', 'closed', 'open', 'listed']
+
 async function getIPOs(status?: string, type?: string): Promise<IPO[]> {
   const where: any = {}
   if (status && status !== 'all') where.status = status
   if (type && type !== 'all') where.type = type
 
-  return prisma.iPO.findMany({
+  const ipos = await prisma.iPO.findMany({
     where,
     orderBy: { srNo: 'asc' }
+  })
+
+  // Sort by status priority
+  return ipos.sort((a, b) => {
+    const statusOrderA = STATUS_ORDER.indexOf(a.status)
+    const statusOrderB = STATUS_ORDER.indexOf(b.status)
+
+    if (statusOrderA !== statusOrderB) {
+      return statusOrderA - statusOrderB
+    }
+
+    // Within same status, sort by srNo
+    return a.srNo - b.srNo
   })
 }
 
@@ -232,8 +247,8 @@ export default async function IPOsPage({
                 <thead className="bg-gradient-to-r from-slate-50 to-blue-50/50">
                   <tr>
                     <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
-                      <div>Sr</div>
-                      <div className="text-[10px] text-slate-400 font-normal">No</div>
+                      <div>#</div>
+                      <div className="text-[10px] text-slate-400 font-normal">Sr</div>
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                       <div>IPO</div>
@@ -264,13 +279,14 @@ export default async function IPOsPage({
                 <tbody className="bg-white/50 divide-y divide-slate-200">
                   {ipos.map((ipo, index) => {
                     const listingGainPercent = getListingGainPercent(ipo.listingPrice, ipo.offerPriceMax)
+                    const dynamicSrNo = index + 1
 
                     return (
                       <tr key={ipo.id} className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-violet-50/50 transition-all duration-200">
-                        {/* Sr. No */}
+                        {/* Dynamic Sr. No */}
                         <td className="px-4 py-3 whitespace-nowrap text-center">
                           <span className="inline-flex items-center justify-center w-7 h-7 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 rounded-lg text-xs font-bold">
-                            {ipo.srNo}
+                            {dynamicSrNo}
                           </span>
                         </td>
 
@@ -281,17 +297,21 @@ export default async function IPOsPage({
 
                         {/* Symbol */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold">
-                            {ipo.symbol}
-                          </span>
+                          {ipo.symbol ? (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold">
+                              {ipo.symbol}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-xs">TBD</span>
+                          )}
                         </td>
 
                         {/* Date Range */}
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-600 font-medium">
-                          {ipo.status === 'upcoming' ? (
-                            <span className="text-slate-400">—</span>
-                          ) : (
+                          {ipo.dateRangeStart || ipo.dateRangeEnd ? (
                             formatDateRange(ipo.dateRangeStart, ipo.dateRangeEnd)
+                          ) : (
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -302,7 +322,7 @@ export default async function IPOsPage({
                               ₹{ipo.offerPriceMin}{ipo.offerPriceMax !== ipo.offerPriceMin ? `-${ipo.offerPriceMax}` : ''}
                             </span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -311,7 +331,7 @@ export default async function IPOsPage({
                           {ipo.lotSize ? (
                             <span className="font-semibold">{ipo.lotSize}</span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -322,7 +342,7 @@ export default async function IPOsPage({
                               {ipo.type === 'mainboard' ? '📊' : '💼'} {ipo.type.toUpperCase()}
                             </span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">—</span>
                           )}
                         </td>
 
@@ -333,7 +353,7 @@ export default async function IPOsPage({
                               {ipo.subscription}x
                             </span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -342,7 +362,7 @@ export default async function IPOsPage({
                           {ipo.listingPrice ? (
                             <span className="font-semibold">₹{ipo.listingPrice}</span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -357,7 +377,7 @@ export default async function IPOsPage({
                               {listingGainPercent >= 0 ? '↑' : '↓'} {Math.abs(listingGainPercent).toFixed(2)}%
                             </span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -368,7 +388,7 @@ export default async function IPOsPage({
                               ₹{ipo.latestPrice.toFixed(2)}
                             </span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -383,7 +403,7 @@ export default async function IPOsPage({
                               {ipo.priceChangePercent >= 0 ? '↑' : '↓'} {Math.abs(ipo.priceChangePercent).toFixed(2)}%
                             </span>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-400 text-xs">TBD</span>
                           )}
                         </td>
 
@@ -409,7 +429,7 @@ export default async function IPOsPage({
         {/* Footer */}
         <footer className="mt-12 text-center pb-8">
           <p className="text-sm text-slate-500">Last updated: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-          <p className="text-xs text-slate-400 mt-1">Data refreshes automatically every hour</p>
+          <p className="text-xs text-slate-400 mt-1">Sorted by: Upcoming → Closed → Open → Listed</p>
         </footer>
       </main>
     </div>

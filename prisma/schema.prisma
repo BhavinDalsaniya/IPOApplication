@@ -15,7 +15,7 @@ model IPO {
   id             String   @id @default(cuid())
   srNo           Int
   name           String
-  symbol         String   @unique
+  symbol         String?
   dateRangeStart DateTime?
   dateRangeEnd   DateTime?
   offerPriceMin  Float?
