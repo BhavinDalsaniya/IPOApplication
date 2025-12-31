@@ -36,6 +36,9 @@ async function getIPOs(): Promise<IPO[]> {
   }))
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function IPOsPage() {
   const ipos = await getIPOs()
 

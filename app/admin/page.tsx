@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import AdminClient from './admin-client'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function AdminPage() {
   const ipos = await prisma.iPO.findMany({
     orderBy: { srNo: 'asc' }
