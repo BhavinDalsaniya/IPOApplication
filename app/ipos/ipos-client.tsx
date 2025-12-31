@@ -167,153 +167,140 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
       </header>
 
       <main className="px-4 sm:px-6 lg:px-8 py-8">
-        {/* Year Filter Buttons */}
+        {/* Combined Filters Section */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-4 mb-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold text-slate-700 mr-2">Year:</span>
-            <button
-              onClick={() => setYearFilter('all')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                yearFilter === 'all'
-                  ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              All
-            </button>
-            {availableYears.map(year => (
-              <button
-                key={year}
-                onClick={() => { setYearFilter(year.toString()); setMonthFilter('all') }}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  yearFilter === year.toString()
-                    ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                {year}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Month Filter Buttons - Only show when year is selected */}
-        {yearFilter !== 'all' && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-4 mb-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold text-slate-700 mr-2">Month:</span>
-              <button
-                onClick={() => setMonthFilter('all')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                  monthFilter === 'all'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                All
-              </button>
-              {MONTHS.map(month => (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Left: Year & Month Filters */}
+            <div className="space-y-3">
+              {/* Year Filter */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold text-slate-700 mr-2">Year:</span>
                 <button
-                  key={month}
-                  onClick={() => setMonthFilter(month)}
+                  onClick={() => setYearFilter('all')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                    monthFilter === month
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+                    yearFilter === 'all'
+                      ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  {month}
+                  All
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Filters & Stats */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-6 mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Status Filter with Stat */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Status
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 font-medium text-slate-700"
-              >
-                <option value="all">All Status ({initialIpos.length})</option>
-                <option value="upcoming">🔵 Upcoming ({initialIpos.filter(i => i.status === 'upcoming').length})</option>
-                <option value="open">🟢 Open ({initialIpos.filter(i => i.status === 'open').length})</option>
-                <option value="closed">⚪ Closed ({initialIpos.filter(i => i.status === 'closed').length})</option>
-                <option value="listed">🟣 Listed ({initialIpos.filter(i => i.status === 'listed').length})</option>
-              </select>
-            </div>
-
-            {/* Type Filter with Stat */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-                Type
-              </label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 font-medium text-slate-700"
-              >
-                <option value="all">All Types ({initialIpos.length})</option>
-                <option value="mainboard">📊 Main ({initialIpos.filter(i => i.type === 'mainboard').length})</option>
-                <option value="sme">💼 SME ({initialIpos.filter(i => i.type === 'sme').length})</option>
-              </select>
-            </div>
-
-            {/* Search Bar */}
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Search IPOs
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by IPO name or symbol..."
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                />
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                {searchQuery && (
+                {availableYears.map(year => (
                   <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    key={year}
+                    onClick={() => { setYearFilter(year.toString()); setMonthFilter('all') }}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                      yearFilter === year.toString()
+                        ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    {year}
                   </button>
-                )}
+                ))}
+              </div>
+
+              {/* Month Filter - Only show when year is selected */}
+              {yearFilter !== 'all' && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-700 mr-2">Month:</span>
+                  <button
+                    onClick={() => setMonthFilter('all')}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                      monthFilter === 'all'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {MONTHS.map(month => (
+                    <button
+                      key={month}
+                      onClick={() => setMonthFilter(month)}
+                      className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                        monthFilter === month
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {month}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Status, Type, and Search Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Status Filter */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm font-medium text-slate-700"
+                >
+                  <option value="all">All ({initialIpos.length})</option>
+                  <option value="upcoming">🔵 Upcoming ({initialIpos.filter(i => i.status === 'upcoming').length})</option>
+                  <option value="open">🟢 Open ({initialIpos.filter(i => i.status === 'open').length})</option>
+                  <option value="closed">⚪ Closed ({initialIpos.filter(i => i.status === 'closed').length})</option>
+                  <option value="listed">🟣 Listed ({initialIpos.filter(i => i.status === 'listed').length})</option>
+                </select>
+              </div>
+
+              {/* Type Filter */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Type</label>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm font-medium text-slate-700"
+                >
+                  <option value="all">All ({initialIpos.length})</option>
+                  <option value="mainboard">📊 Main ({initialIpos.filter(i => i.type === 'mainboard').length})</option>
+                  <option value="sme">💼 SME ({initialIpos.filter(i => i.type === 'sme').length})</option>
+                </select>
+              </div>
+
+              {/* Search */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Search</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="IPO name or symbol..."
+                    className="w-full pl-8 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+                  />
+                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Results count */}
+          {/* Results count & Clear Filters */}
           {(statusFilter !== 'all' || typeFilter !== 'all' || searchQuery || yearFilter !== 'all' || monthFilter !== 'all') && (
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
+            <div className="mt-3 flex items-center justify-between pt-3 border-t border-slate-200">
+              <div className="text-xs text-slate-600">
                 Showing <span className="font-semibold text-slate-900">{filteredIpos.length}</span> of <span className="font-semibold text-slate-900">{initialIpos.length}</span> IPOs
               </div>
               <button
                 onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setSearchQuery(''); setYearFilter('all'); setMonthFilter('all') }}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
               >
                 Clear all filters
               </button>
