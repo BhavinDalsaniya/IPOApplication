@@ -28,7 +28,7 @@ interface IPOsClientProps {
   initialIpos: IPO[]
 }
 
-const STATUS_ORDER = ['upcoming', 'closed', 'open', 'listed']
+const STATUS_ORDER = ['upcoming', 'open', 'closed', 'listed']
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -538,7 +538,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
         {/* Footer */}
         <footer className="mt-12 text-center pb-8">
           <p className="text-sm text-slate-500">Last updated: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-          <p className="text-xs text-slate-400 mt-1">Sorted by: Upcoming → Closed → Open → Listed</p>
+          <p className="text-xs text-slate-400 mt-1">Sorted by: Upcoming → Open → Closed → Listed</p>
         </footer>
       </main>
     </div>
