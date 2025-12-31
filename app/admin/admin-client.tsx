@@ -7,7 +7,7 @@ interface IPO {
   id: string
   srNo: number
   name: string
-  symbol: string
+  symbol: string | null
   dateRangeStart?: string | null
   dateRangeEnd?: string | null
   offerPriceMin?: number | null
