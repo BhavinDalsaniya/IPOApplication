@@ -335,33 +335,36 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                   <span className="text-sm font-semibold text-slate-700 mr-1">Type:</span>
                   <button
                     onClick={() => setTypeFilter('all')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       typeFilter === 'all'
                         ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
                     All ({initialIpos.length})
                   </button>
                   <button
                     onClick={() => setTypeFilter('mainboard')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       typeFilter === 'mainboard'
-                        ? 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    📊 Main ({initialIpos.filter(i => i.type === 'mainboard').length})
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                    Main ({initialIpos.filter(i => i.type === 'mainboard').length})
                   </button>
                   <button
                     onClick={() => setTypeFilter('sme')}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                       typeFilter === 'sme'
-                        ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-cyan-400 via-teal-500 to-cyan-600 text-white shadow-md'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    💼 SME ({initialIpos.filter(i => i.type === 'sme').length})
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/></svg>
+                    SME ({initialIpos.filter(i => i.type === 'sme').length})
                   </button>
                 </div>
               </div>
