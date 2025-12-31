@@ -28,11 +28,14 @@ interface IPOsClientProps {
 
 const STATUS_ORDER = ['upcoming', 'closed', 'open', 'listed']
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 export default function IPOsClient({ initialIpos }: IPOsClientProps) {
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [yearFilter, setYearFilter] = useState('all')
+  const [monthFilter, setMonthFilter] = useState('all')
 
   // Filter and sort IPOs
   const filteredIpos = useMemo(() => {
@@ -67,6 +70,16 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
       })
     }
 
+    // Filter by month (only if year is selected)
+    if (yearFilter !== 'all' && monthFilter !== 'all') {
+      filtered = filtered.filter(ipo => {
+        const startMonth = ipo.dateRangeStart ? new Date(ipo.dateRangeStart).getMonth() : null
+        const endMonth = ipo.dateRangeEnd ? new Date(ipo.dateRangeEnd).getMonth() : null
+        const month = MONTHS.indexOf(monthFilter)
+        return startMonth === month || endMonth === month
+      })
+    }
+
     // Sort by status priority, then by date (newest first)
     return filtered.sort((a, b) => {
       const statusOrderA = STATUS_ORDER.indexOf(a.status)
@@ -88,7 +101,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
       // If no dates, fall back to srNo
       return a.srNo - b.srNo
     })
-  }, [initialIpos, statusFilter, typeFilter, searchQuery, yearFilter])
+  }, [initialIpos, statusFilter, typeFilter, searchQuery, yearFilter, monthFilter])
 
   // Get available years from IPOs
   const availableYears = useMemo(() => {
@@ -171,7 +184,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
             {availableYears.map(year => (
               <button
                 key={year}
-                onClick={() => setYearFilter(year.toString())}
+                onClick={() => { setYearFilter(year.toString()); setMonthFilter('all') }}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                   yearFilter === year.toString()
                     ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md'
@@ -183,6 +196,38 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
             ))}
           </div>
         </div>
+
+        {/* Month Filter Buttons - Only show when year is selected */}
+        {yearFilter !== 'all' && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-slate-700 mr-2">Month:</span>
+              <button
+                onClick={() => setMonthFilter('all')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                  monthFilter === 'all'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                All
+              </button>
+              {MONTHS.map(month => (
+                <button
+                  key={month}
+                  onClick={() => setMonthFilter(month)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                    monthFilter === month
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {month}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Filters & Stats */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-6 mb-8">
@@ -261,13 +306,13 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
           </div>
 
           {/* Results count */}
-          {(statusFilter !== 'all' || typeFilter !== 'all' || searchQuery || yearFilter !== 'all') && (
+          {(statusFilter !== 'all' || typeFilter !== 'all' || searchQuery || yearFilter !== 'all' || monthFilter !== 'all') && (
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-slate-600">
                 Showing <span className="font-semibold text-slate-900">{filteredIpos.length}</span> of <span className="font-semibold text-slate-900">{initialIpos.length}</span> IPOs
               </div>
               <button
-                onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setSearchQuery(''); setYearFilter('all') }}
+                onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setSearchQuery(''); setYearFilter('all'); setMonthFilter('all') }}
                 className="text-sm text-blue-600 hover:text-blue-800 font-medium"
               >
                 Clear all filters
@@ -286,7 +331,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
             </div>
             <p className="text-slate-500 text-lg">No IPOs found matching your filters.</p>
             <button
-              onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setSearchQuery('') }}
+              onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setSearchQuery(''); setYearFilter('all'); setMonthFilter('all') }}
               className="mt-4 text-blue-600 hover:text-blue-800 font-medium"
             >
               Clear all filters
