@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Cron job error:', error)
     return NextResponse.json(
-      { error: 'Cron job failed', message: error.message },
+      { error: 'Cron job failed', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
