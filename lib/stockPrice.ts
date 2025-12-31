@@ -86,7 +86,8 @@ async function fetchFromYahooFinance(symbol: string, exchange?: string): Promise
       timestamp: new Date()
     }
   } catch (error) {
-    console.error(`Yahoo Finance error for ${symbol}:`, error.message)
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+    console.error(`Yahoo Finance error for ${symbol}:`, errorMsg)
     return null
   }
 }
@@ -129,7 +130,8 @@ async function fetchFromNSE(symbol: string): Promise<StockQuote | null> {
       timestamp: new Date()
     }
   } catch (error) {
-    console.error(`NSE API error for ${symbol}:`, error.message)
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+    console.error(`NSE API error for ${symbol}:`, errorMsg)
     return null
   }
 }
@@ -163,7 +165,8 @@ async function fetchFromGroww(symbol: string): Promise<StockQuote | null> {
       timestamp: new Date()
     }
   } catch (error) {
-    console.error(`Groww API error for ${symbol}:`, error.message)
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+    console.error(`Groww API error for ${symbol}:`, errorMsg)
     return null
   }
 }
