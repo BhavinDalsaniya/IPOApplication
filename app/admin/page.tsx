@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma'
-import Link from 'next/link'
 import AdminClient from './admin-client'
 
 export default async function AdminPage() {
@@ -7,5 +6,15 @@ export default async function AdminPage() {
     orderBy: { srNo: 'asc' }
   })
 
-  return <AdminClient initialIpos={ipos} />
+  // Serialize Date objects to strings for client component
+  const serializedIpos = ipos.map(ipo => ({
+    ...ipo,
+    dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
+    dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
+    priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,
+    createdAt: ipo.createdAt.toISOString(),
+    updatedAt: ipo.updatedAt.toISOString(),
+  }))
+
+  return <AdminClient initialIpos={serializedIpos} />
 }
