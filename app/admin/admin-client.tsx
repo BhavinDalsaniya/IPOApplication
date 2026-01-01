@@ -48,11 +48,49 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
     gmp: '',
     gmpPercent: '',
     listingPrice: '',
+    listingGainPercent: '',
     exchange: '',
     token: '',
     status: 'upcoming',
     description: ''
   })
+
+  // Helper to parse offer price max from the offerPrice string
+  const getOfferPriceMax = () => {
+    if (!formData.offerPrice) return null
+    const parts = formData.offerPrice.split('-')
+    return parseFloat(parts[1]?.trim() || parts[0]?.trim() || '0') || null
+  }
+
+  // Handle listing price change - auto-calculate gain percent
+  const handleListingPriceChange = (value: string) => {
+    setFormData({ ...formData, listingPrice: value })
+
+    const listingPrice = parseFloat(value)
+    const offerPriceMax = getOfferPriceMax()
+
+    if (listingPrice && offerPriceMax) {
+      const gainPercent = ((listingPrice - offerPriceMax) / offerPriceMax) * 100
+      setFormData(prev => ({ ...prev, listingPrice: value, listingGainPercent: gainPercent.toFixed(2) }))
+    } else if (!value) {
+      setFormData(prev => ({ ...prev, listingPrice: value, listingGainPercent: '' }))
+    }
+  }
+
+  // Handle listing gain percent change - auto-calculate listing price
+  const handleListingGainPercentChange = (value: string) => {
+    setFormData({ ...formData, listingGainPercent: value })
+
+    const gainPercent = parseFloat(value)
+    const offerPriceMax = getOfferPriceMax()
+
+    if (gainPercent !== null && gainPercent !== undefined && offerPriceMax) {
+      const listingPrice = offerPriceMax * (1 + gainPercent / 100)
+      setFormData(prev => ({ ...prev, listingGainPercent: value, listingPrice: listingPrice.toFixed(2) }))
+    } else if (!value) {
+      setFormData(prev => ({ ...prev, listingGainPercent: value, listingPrice: '' }))
+    }
+  }
 
   // Auto-generate next Sr. No based on existing IPOs
   const nextSrNo = useMemo(() => {
@@ -106,6 +144,12 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
   }
 
   const handleEdit = (ipo: IPO) => {
+    // Calculate listing gain percent
+    let listingGainPercent = ''
+    if (ipo.listingPrice && ipo.offerPriceMax) {
+      listingGainPercent = (((ipo.listingPrice - ipo.offerPriceMax) / ipo.offerPriceMax) * 100).toFixed(2)
+    }
+
     setFormData({
       name: ipo.name,
       symbol: ipo.symbol || '',
@@ -121,6 +165,7 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
       gmp: ipo.gmp?.toString() || '',
       gmpPercent: ipo.gmpPercent?.toString() || '',
       listingPrice: ipo.listingPrice?.toString() || '',
+      listingGainPercent,
       exchange: ipo.exchange || '',
       token: ipo.token || '',
       status: ipo.status,
@@ -168,6 +213,7 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
       gmp: '',
       gmpPercent: '',
       listingPrice: '',
+      listingGainPercent: '',
       exchange: '',
       token: '',
       status: 'upcoming',
@@ -342,7 +388,20 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                   type="text"
                   placeholder="108-114"
                   value={formData.offerPrice}
-                  onChange={(e) => setFormData({ ...formData, offerPrice: e.target.value })}
+                  onChange={(e) => {
+                    const newOfferPrice = e.target.value
+                    setFormData({ ...formData, offerPrice: newOfferPrice })
+                    // Recalculate listing gain if listing price exists
+                    if (formData.listingPrice) {
+                      const parts = newOfferPrice.split('-')
+                      const offerPriceMax = parseFloat(parts[1]?.trim() || parts[0]?.trim() || '0')
+                      const listingPrice = parseFloat(formData.listingPrice)
+                      if (listingPrice && offerPriceMax) {
+                        const gainPercent = ((listingPrice - offerPriceMax) / offerPriceMax) * 100
+                        setFormData(prev => ({ ...prev, offerPrice: newOfferPrice, listingGainPercent: gainPercent.toFixed(2) }))
+                      }
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -394,7 +453,18 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                   type="text"
                   placeholder="e.g., 120"
                   value={formData.listingPrice}
-                  onChange={(e) => setFormData({ ...formData, listingPrice: e.target.value })}
+                  onChange={(e) => handleListingPriceChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Listing Gain % (Optional)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Auto-calculated or enter manually"
+                  value={formData.listingGainPercent}
+                  onChange={(e) => handleListingGainPercentChange(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

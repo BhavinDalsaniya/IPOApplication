@@ -22,74 +22,97 @@ export async function POST(request: NextRequest) {
     let updatedCount = 0
     const results: any[] = []
 
-    // Fetch prices for each IPO individually (to use correct exchange)
+    // Filter IPOs with symbols
+    const iposWithSymbols = ipos.filter(ipo => ipo.symbol && ipo.symbol.trim() !== '')
+
+    // Process IPOs in parallel batches (much faster than sequential)
+    const BATCH_SIZE = 10 // Process 10 IPOs at a time
+    const BATCH_DELAY = 100 // Reduced delay to 100ms between batches
+
+    for (let i = 0; i < iposWithSymbols.length; i += BATCH_SIZE) {
+      const batch = iposWithSymbols.slice(i, i + BATCH_SIZE)
+
+      // Process batch in parallel
+      const batchPromises = batch.map(async (ipo) => {
+        try {
+          const quote = await fetchStockPrice(ipo.symbol, ipo.exchange || 'NSE')
+
+          if (!quote) {
+            return {
+              symbol: ipo.symbol,
+              status: 'not_found',
+              error: 'No data from API'
+            }
+          }
+
+          const oldPrice = ipo.latestPrice
+          const priceChangePercent = ipo.offerPriceMax
+            ? calculateIPOGain(quote.price, ipo.offerPriceMax)
+            : null
+
+          await prisma.iPO.update({
+            where: { id: ipo.id },
+            data: {
+              latestPrice: quote.price,
+              priceChangePercent,
+              priceUpdatedAt: new Date()
+            }
+          })
+
+          // Log the price update
+          await prisma.priceUpdateLog.create({
+            data: {
+              ipoId: ipo.id,
+              symbol: ipo.symbol,
+              oldPrice,
+              newPrice: quote.price,
+              changePercent: priceChangePercent,
+              source: 'API'
+            }
+          })
+
+          return {
+            symbol: ipo.symbol,
+            name: ipo.name,
+            oldPrice,
+            newPrice: quote.price,
+            changePercent: priceChangePercent
+          }
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+          console.error(`Error updating ${ipo.symbol}:`, errorMsg)
+          return {
+            symbol: ipo.symbol,
+            status: 'error',
+            error: errorMsg
+          }
+        }
+      })
+
+      // Wait for all items in this batch to complete
+      const batchResults = await Promise.all(batchPromises)
+
+      // Count successful updates and collect results
+      for (const result of batchResults) {
+        if (!result.status && result.symbol) {
+          updatedCount++
+        }
+        results.push(result)
+      }
+
+      // Small delay between batches to avoid rate limiting
+      if (i + BATCH_SIZE < iposWithSymbols.length) {
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY))
+      }
+    }
+
+    // Add skipped IPOs (without symbols) to results
     for (const ipo of ipos) {
-      // Skip IPOs without a symbol
       if (!ipo.symbol || ipo.symbol.trim() === '') {
         results.push({
           name: ipo.name,
           status: 'skipped',
           error: 'No symbol'
-        })
-        continue
-      }
-
-      try {
-        const quote = await fetchStockPrice(ipo.symbol, ipo.exchange || 'NSE')
-
-        if (!quote) {
-          results.push({
-            symbol: ipo.symbol,
-            status: 'not_found',
-            error: 'No data from API'
-          })
-          continue
-        }
-
-        const oldPrice = ipo.latestPrice
-        const priceChangePercent = ipo.offerPriceMax
-          ? calculateIPOGain(quote.price, ipo.offerPriceMax)
-          : null
-
-        await prisma.iPO.update({
-          where: { id: ipo.id },
-          data: {
-            latestPrice: quote.price,
-            priceChangePercent,
-            priceUpdatedAt: new Date()
-          }
-        })
-
-        // Log the price update
-        await prisma.priceUpdateLog.create({
-          data: {
-            ipoId: ipo.id,
-            symbol: ipo.symbol,
-            oldPrice,
-            newPrice: quote.price,
-            changePercent: priceChangePercent,
-            source: 'API'
-          }
-        })
-
-        updatedCount++
-        results.push({
-          symbol: ipo.symbol,
-          name: ipo.name,
-          oldPrice,
-          newPrice: quote.price,
-          changePercent: priceChangePercent
-        })
-
-        // Small delay between requests to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 500))
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-        console.error(`Error updating ${ipo.symbol}:`, errorMsg)
-        results.push({
-          symbol: ipo.symbol,
-          status: 'error',
-          error: errorMsg
         })
       }
     }

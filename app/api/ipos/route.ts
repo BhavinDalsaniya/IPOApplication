@@ -75,6 +75,32 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    // Check for duplicate name
+    if (body.name) {
+      const existingByName = await prisma.iPO.findUnique({
+        where: { name: body.name }
+      })
+      if (existingByName) {
+        return NextResponse.json(
+          { error: 'IPO with this name already exists', field: 'name' },
+          { status: 409 }
+        )
+      }
+    }
+
+    // Check for duplicate symbol (if provided)
+    if (body.symbol && body.symbol.trim() !== '') {
+      const existingBySymbol = await prisma.iPO.findUnique({
+        where: { symbol: body.symbol }
+      })
+      if (existingBySymbol) {
+        return NextResponse.json(
+          { error: 'IPO with this symbol already exists', field: 'symbol' },
+          { status: 409 }
+        )
+      }
+    }
+
     const dateRange = parseDateRange(body.dateRange)
     const offerPrice = parseOfferPrice(body.offerPrice)
 
@@ -82,7 +108,7 @@ export async function POST(request: NextRequest) {
       data: {
         srNo: parseInt(body.srNo) || 0,
         name: body.name,
-        symbol: body.symbol,
+        symbol: body.symbol || null,
         dateRangeStart: dateRange.start,
         dateRangeEnd: dateRange.end,
         offerPriceMin: offerPrice.min,

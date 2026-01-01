@@ -14,8 +14,8 @@ datasource db {
 model IPO {
   id             String   @id @default(cuid())
   srNo           Int
-  name           String
-  symbol         String?
+  name           String   @unique
+  symbol         String?  @unique
   dateRangeStart DateTime?
   dateRangeEnd   DateTime?
   offerPriceMin  Float?
