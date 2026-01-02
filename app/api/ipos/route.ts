@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 
 // GET all IPOs - with optional filtering and pagination
 export async function GET(request: NextRequest) {
@@ -18,53 +17,18 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination info
     const total = await prisma.iPO.count({ where })
 
-    // For "all" status, use raw SQL to sort by status priority then by date
-    // Status priority: upcoming=1, open=2, closed=3, listed=4
-    // Within each status: sort by relevant date (newest first)
-    if (!status || status === 'all') {
-      const ipos: any[] = await prisma.$queryRaw`
-        SELECT *
-        FROM ipos
-        WHERE ${type ? Prisma.sql`type = ${type}` : Prisma.sql`1=1`}
-        ORDER BY
-          CASE status
-            WHEN 'upcoming' THEN 1
-            WHEN 'open' THEN 2
-            WHEN 'closed' THEN 3
-            WHEN 'listed' THEN 4
-            ELSE 5
-          END ASC,
-          COALESCE("dateRangeEnd", "dateRangeStart", '1970-01-01'::date) DESC,
-          "srNo" DESC
-        LIMIT ${limit}
-        OFFSET ${(page - 1) * limit}
-      `
-
-      // Serialize Date objects to ISO strings for JSON response
-      const serializedIpos = ipos.map(ipo => ({
-        ...ipo,
-        dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
-        dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
-        priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,
-        createdAt: ipo.createdAt?.toISOString() || null,
-        updatedAt: ipo.updatedAt?.toISOString() || null,
-      }))
-
-      return NextResponse.json({
-        ipos: serializedIpos,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-          hasMore: page * limit < total
-        }
-      })
-    }
-
-    // For specific status filters, use Prisma findMany
+    // Determine sort order - use same logic for all statuses
+    // Sort by dateRangeEnd primarily, fallback to dateRangeStart, then srNo
     let orderBy: any
-    if (status === 'listed') {
+
+    if (!status || status === 'all') {
+      // Same as listed - sort by dateRangeEnd, then dateRangeStart, then srNo
+      orderBy = [
+        { dateRangeEnd: 'desc' as const },
+        { dateRangeStart: 'desc' as const },
+        { srNo: 'desc' as const }
+      ]
+    } else if (status === 'listed') {
       orderBy = { dateRangeEnd: 'desc' }
     } else if (status === 'open' || status === 'upcoming') {
       orderBy = { dateRangeStart: 'desc' }
