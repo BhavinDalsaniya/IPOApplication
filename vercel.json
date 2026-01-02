@@ -1,0 +1,16 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "framework": "nextjs",
+  "regions": ["hkg1"],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "DIRECT_URL": "@direct-url",
+    "NEXT_PUBLIC_APP_URL": "@app-url"
+  },
+  "build": {
+    "env": {
+      "DATABASE_URL": "@database-url",
+      "DIRECT_URL": "@direct-url"
+    }
+  }
+}
