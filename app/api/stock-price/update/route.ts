@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       // Process batch in parallel
       const batchPromises = batch.map(async (ipo) => {
         try {
-          const quote = await fetchStockPrice(ipo.symbol, ipo.exchange || 'NSE')
+          const quote = await fetchStockPrice(ipo.symbol!, ipo.exchange || 'NSE')
 
           if (!quote) {
             return {
