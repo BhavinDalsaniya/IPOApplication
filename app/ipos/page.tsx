@@ -22,13 +22,33 @@ interface IPO {
   status: 'upcoming' | 'open' | 'closed' | 'listed'
 }
 
-async function getIPOs(): Promise<IPO[]> {
+interface PaginationData {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasMore: boolean
+}
+
+async function getIPOs(page: number = 1, limit: number = 20): Promise<{
+  ipos: IPO[]
+  pagination: PaginationData
+}> {
+  const where: any = {}
+
+  // Get total count
+  const total = await prisma.iPO.count({ where })
+
+  // Get paginated results
   const ipos = await prisma.iPO.findMany({
-    orderBy: { srNo: 'asc' }
+    where,
+    orderBy: { srNo: 'asc' },
+    skip: (page - 1) * limit,
+    take: limit
   })
 
   // Serialize Date objects to strings for client component
-  return ipos.map(ipo => ({
+  const serializedIpos = ipos.map(ipo => ({
     ...ipo,
     type: ipo.type as 'mainboard' | 'sme' | null,
     status: ipo.status as 'upcoming' | 'open' | 'closed' | 'listed',
@@ -38,13 +58,24 @@ async function getIPOs(): Promise<IPO[]> {
     gmp: (ipo as any).gmp || null,
     gmpPercent: (ipo as any).gmpPercent || null,
   }))
+
+  return {
+    ipos: serializedIpos,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasMore: page * limit < total
+    }
+  }
 }
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function IPOsPage() {
-  const ipos = await getIPOs()
+  const { ipos, pagination } = await getIPOs(1, 20)
 
-  return <IPOsClient initialIpos={ipos} />
+  return <IPOsClient initialIpos={ipos} initialPagination={pagination} />
 }

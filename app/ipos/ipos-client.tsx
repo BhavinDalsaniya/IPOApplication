@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 
 interface IPO {
@@ -24,34 +24,67 @@ interface IPO {
   status: 'upcoming' | 'open' | 'closed' | 'listed'
 }
 
+interface PaginationData {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasMore: boolean
+}
+
 interface IPOsClientProps {
   initialIpos: IPO[]
+  initialPagination: PaginationData
 }
 
 const STATUS_ORDER = ['upcoming', 'open', 'closed', 'listed']
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-export default function IPOsClient({ initialIpos }: IPOsClientProps) {
+export default function IPOsClient({ initialIpos, initialPagination }: IPOsClientProps) {
+  const [ipos, setIpos] = useState<IPO[]>(initialIpos)
+  const [pagination, setPagination] = useState<PaginationData>(initialPagination)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [yearFilter, setYearFilter] = useState('all')
   const [monthFilter, setMonthFilter] = useState('all')
 
-  // Filter and sort IPOs
+  // Fetch IPOs with filters and pagination
+  const fetchIPOs = async (page: number = 1) => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '20'
+      })
+
+      if (statusFilter !== 'all') params.append('status', statusFilter)
+      if (typeFilter !== 'all') params.append('type', typeFilter)
+
+      const response = await fetch(`/api/ipos?${params.toString()}`)
+      const data = await response.json()
+
+      setIpos(data.ipos)
+      setPagination(data.pagination)
+      setCurrentPage(page)
+    } catch (error) {
+      console.error('Error fetching IPOs:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Refetch when filters change
+  useEffect(() => {
+    fetchIPOs(1)
+  }, [statusFilter, typeFilter])
+
+  // Filter and sort IPOs (client-side for search/year/month)
   const filteredIpos = useMemo(() => {
-    let filtered = [...initialIpos]
-
-    // Filter by status
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(ipo => ipo.status === statusFilter)
-    }
-
-    // Filter by type
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(ipo => ipo.type === typeFilter)
-    }
+    let filtered = [...ipos]
 
     // Filter by search
     if (searchQuery.trim()) {
@@ -82,38 +115,18 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
       })
     }
 
-    // Sort by status priority, then by date (newest first)
-    return filtered.sort((a, b) => {
-      const statusOrderA = STATUS_ORDER.indexOf(a.status)
-      const statusOrderB = STATUS_ORDER.indexOf(b.status)
+    return filtered
+  }, [ipos, searchQuery, yearFilter, monthFilter])
 
-      if (statusOrderA !== statusOrderB) {
-        return statusOrderA - statusOrderB
-      }
-
-      // Within same status, sort by date (newest first)
-      // Use dateRangeEnd as the primary date, fallback to dateRangeStart
-      const dateA = a.dateRangeEnd || a.dateRangeStart
-      const dateB = b.dateRangeEnd || b.dateRangeStart
-
-      if (dateA && dateB) {
-        return new Date(dateB).getTime() - new Date(dateA).getTime()
-      }
-
-      // If no dates, fall back to srNo
-      return a.srNo - b.srNo
-    })
-  }, [initialIpos, statusFilter, typeFilter, searchQuery, yearFilter, monthFilter])
-
-  // Get available years from IPOs
+  // Get available years from IPOs - use a separate fetch to get all years
   const availableYears = useMemo(() => {
     const years = new Set<number>()
-    initialIpos.forEach(ipo => {
+    ipos.forEach(ipo => {
       if (ipo.dateRangeStart) years.add(new Date(ipo.dateRangeStart).getFullYear())
       if (ipo.dateRangeEnd) years.add(new Date(ipo.dateRangeEnd).getFullYear())
     })
     return Array.from(years).sort((a, b) => b - a)
-  }, [initialIpos])
+  }, [ipos])
 
   const formatDate = (date: string | null) => {
     if (!date) return '-'
@@ -280,7 +293,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
-                    All ({initialIpos.length})
+                    All
                   </button>
                   <button
                     onClick={() => setStatusFilter('upcoming')}
@@ -291,7 +304,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-                    Upcoming ({initialIpos.filter(i => i.status === 'upcoming').length})
+                    Upcoming
                   </button>
                   <button
                     onClick={() => setStatusFilter('open')}
@@ -302,7 +315,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    Open ({initialIpos.filter(i => i.status === 'open').length})
+                    Open
                   </button>
                   <button
                     onClick={() => setStatusFilter('closed')}
@@ -313,7 +326,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-                    Closed ({initialIpos.filter(i => i.status === 'closed').length})
+                    Closed
                   </button>
                   <button
                     onClick={() => setStatusFilter('listed')}
@@ -324,7 +337,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    Listed ({initialIpos.filter(i => i.status === 'listed').length})
+                    Listed
                   </button>
                 </div>
               </div>
@@ -342,7 +355,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
-                    All ({initialIpos.length})
+                    All
                   </button>
                   <button
                     onClick={() => setTypeFilter('mainboard')}
@@ -353,7 +366,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
-                    Main ({initialIpos.filter(i => i.type === 'mainboard').length})
+                    Main
                   </button>
                   <button
                     onClick={() => setTypeFilter('sme')}
@@ -364,7 +377,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/></svg>
-                    SME ({initialIpos.filter(i => i.type === 'sme').length})
+                    SME
                   </button>
                 </div>
               </div>
@@ -375,7 +388,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
           {(statusFilter !== 'all' || typeFilter !== 'all' || searchQuery || yearFilter !== 'all' || monthFilter !== 'all') && (
             <div className="mt-3 flex items-center justify-between pt-3 border-t border-slate-200">
               <div className="text-xs text-slate-600">
-                Showing <span className="font-semibold text-slate-900">{filteredIpos.length}</span> of <span className="font-semibold text-slate-900">{initialIpos.length}</span> IPOs
+                Showing <span className="font-semibold text-slate-900">{filteredIpos.length}</span> of <span className="font-semibold text-slate-900">{pagination.total}</span> IPOs
               </div>
               <button
                 onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setSearchQuery(''); setYearFilter('all'); setMonthFilter('all') }}
@@ -443,7 +456,7 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                 <tbody className="bg-white/50 divide-y divide-slate-200">
                   {filteredIpos.map((ipo, index) => {
                     const listingGainPercent = getListingGainPercent(ipo.listingPrice, ipo.offerPriceMax)
-                    const dynamicSrNo = index + 1
+                    const dynamicSrNo = (currentPage - 1) * pagination.limit + index + 1
 
                     return (
                       <tr key={ipo.id} className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-violet-50/50 transition-all duration-200">
@@ -609,6 +622,72 @@ export default function IPOsClient({ initialIpos }: IPOsClientProps) {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {!loading && pagination.totalPages > 1 && (
+          <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-600">
+                Showing page <span className="font-bold text-slate-900">{pagination.page}</span> of <span className="font-bold text-slate-900">{pagination.totalPages}</span>
+                <span className="ml-2">({pagination.total} total IPOs)</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchIPOs(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                  className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:hover:bg-slate-100"
+                >
+                  Previous
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    let pageNum
+                    if (pagination.totalPages <= 5) {
+                      pageNum = i + 1
+                    } else if (pagination.page <= 3) {
+                      pageNum = i + 1
+                    } else if (pagination.page >= pagination.totalPages - 2) {
+                      pageNum = pagination.totalPages - 4 + i
+                    } else {
+                      pageNum = pagination.page - 2 + i
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => fetchIPOs(pageNum)}
+                        className={`w-10 h-10 text-sm font-bold rounded-lg transition-all duration-200 ${
+                          pagination.page === pageNum
+                            ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <button
+                  onClick={() => fetchIPOs(pagination.page + 1)}
+                  disabled={!pagination.hasMore}
+                  className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:hover:bg-slate-100"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading indicator */}
+        {loading && (
+          <div className="mt-6 flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         )}
 

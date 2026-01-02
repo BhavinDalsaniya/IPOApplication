@@ -1,23 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// GET all IPOs - with optional filtering
+// GET all IPOs - with optional filtering and pagination
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const status = searchParams.get('status')
     const type = searchParams.get('type')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
 
     const where: any = {}
     if (status) where.status = status
     if (type) where.type = type
 
+    // Get total count for pagination info
+    const total = await prisma.iPO.count({ where })
+
+    // Get paginated results
     const ipos = await prisma.iPO.findMany({
       where,
-      orderBy: { srNo: 'asc' }
+      orderBy: { srNo: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
     })
 
-    return NextResponse.json(ipos)
+    return NextResponse.json({
+      ipos,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: page * limit < total
+      }
+    })
   } catch (error) {
     console.error('Error fetching IPOs:', error)
     return NextResponse.json(
