@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       // Use raw query for complex sorting
       const ipos: any[] = await prisma.$queryRaw`
         SELECT *
-        FROM "IPO"
+        FROM ipos
         WHERE ${type ? Prisma.sql`type = ${type}` : Prisma.sql`1=1`}
         ORDER BY
           CASE status
