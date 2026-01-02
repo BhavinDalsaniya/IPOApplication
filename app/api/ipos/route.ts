@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       // For "all" status, sort by custom priority: upcoming=1, open=2, closed=3, listed=4
       // Then by date within each status group
       // Use raw query for complex sorting
-      const ipos = await prisma.$queryRaw`
+      const ipos: any[] = await prisma.$queryRaw`
         SELECT *
         FROM "IPO"
         WHERE ${type ? Prisma.sql`type = ${type}` : Prisma.sql`1=1`}
@@ -50,8 +50,18 @@ export async function GET(request: NextRequest) {
         OFFSET ${(page - 1) * limit}
       `
 
+      // Serialize Date objects to ISO strings for JSON response
+      const serializedIpos = ipos.map(ipo => ({
+        ...ipo,
+        dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
+        dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
+        priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,
+        createdAt: ipo.createdAt?.toISOString() || null,
+        updatedAt: ipo.updatedAt?.toISOString() || null,
+      }))
+
       return NextResponse.json({
-        ipos,
+        ipos: serializedIpos,
         pagination: {
           page,
           limit,
