@@ -17,10 +17,17 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination info
     const total = await prisma.iPO.count({ where })
 
+    // Determine sort order based on status
+    // For "listed" IPOs, sort by dateRangeEnd (newest first)
+    // For others, sort by srNo (newest first)
+    const orderBy = status === 'listed'
+      ? { dateRangeEnd: 'desc' as const }
+      : { srNo: 'desc' as const }
+
     // Get paginated results
     const ipos = await prisma.iPO.findMany({
       where,
-      orderBy: { srNo: 'desc' },
+      orderBy,
       skip: (page - 1) * limit,
       take: limit
     })

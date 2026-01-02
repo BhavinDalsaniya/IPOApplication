@@ -39,10 +39,14 @@ async function getIPOs(page: number = 1, limit: number = 20): Promise<{
   // Get total count
   const total = await prisma.iPO.count({ where })
 
+  // For initial page load (no status filter), use srNo desc
+  // Status filtering is done client-side via API calls
+  const orderBy = { srNo: 'desc' as const }
+
   // Get paginated results
   const ipos = await prisma.iPO.findMany({
     where,
-    orderBy: { srNo: 'desc' },
+    orderBy,
     skip: (page - 1) * limit,
     take: limit
   })
