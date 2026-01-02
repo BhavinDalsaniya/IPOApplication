@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
           await prisma.priceUpdateLog.create({
             data: {
               ipoId: ipo.id,
-              symbol: ipo.symbol,
+              symbol: ipo.symbol!,
               oldPrice,
               newPrice: quote.price,
               changePercent: priceChangePercent,
