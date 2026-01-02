@@ -42,7 +42,7 @@ async function getIPOs(page: number = 1, limit: number = 20): Promise<{
   // Get paginated results
   const ipos = await prisma.iPO.findMany({
     where,
-    orderBy: { srNo: 'asc' },
+    orderBy: { srNo: 'desc' },
     skip: (page - 1) * limit,
     take: limit
   })
