@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 
 // GET all IPOs - with optional filtering and pagination
 export async function GET(request: NextRequest) {
@@ -19,63 +18,24 @@ export async function GET(request: NextRequest) {
     const total = await prisma.iPO.count({ where })
 
     // Determine sort order based on status
-    // For "listed" IPOs, sort by dateRangeEnd (newest first)
-    // For "open" or "upcoming", sort by dateRangeStart (newest first)
-    // For "closed", sort by dateRangeEnd (newest first)
-    // For "all" (no filter), we need custom sorting by status priority
-    let orderBy: any = { srNo: 'desc' }
+    // For "all", sort by dateRangeEnd primarily (newest first), fallback to dateRangeStart, then srNo
+    // This naturally groups IPOs by status since statuses are tied to dates
+    let orderBy: any
 
     if (!status || status === 'all') {
-      // For "all" status, sort by custom priority: upcoming=1, open=2, closed=3, listed=4
-      // Then by date within each status group
-      // Use raw query for complex sorting
-      const ipos: any[] = await prisma.$queryRaw`
-        SELECT *
-        FROM ipos
-        WHERE ${type ? Prisma.sql`type = ${type}` : Prisma.sql`1=1`}
-        ORDER BY
-          CASE status
-            WHEN 'upcoming' THEN 1
-            WHEN 'open' THEN 2
-            WHEN 'closed' THEN 3
-            WHEN 'listed' THEN 4
-            ELSE 5
-          END ASC,
-          CASE
-            WHEN status IN ('upcoming', 'open') THEN "dateRangeStart"
-            ELSE "dateRangeEnd"
-          END DESC NULLS LAST,
-          "srNo" DESC
-        LIMIT ${limit}
-        OFFSET ${(page - 1) * limit}
-      `
-
-      // Serialize Date objects to ISO strings for JSON response
-      const serializedIpos = ipos.map(ipo => ({
-        ...ipo,
-        dateRangeStart: ipo.dateRangeStart?.toISOString() || null,
-        dateRangeEnd: ipo.dateRangeEnd?.toISOString() || null,
-        priceUpdatedAt: ipo.priceUpdatedAt?.toISOString() || null,
-        createdAt: ipo.createdAt?.toISOString() || null,
-        updatedAt: ipo.updatedAt?.toISOString() || null,
-      }))
-
-      return NextResponse.json({
-        ipos: serializedIpos,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-          hasMore: page * limit < total
-        }
-      })
+      orderBy = [
+        { dateRangeEnd: 'desc' as const },
+        { dateRangeStart: 'desc' as const },
+        { srNo: 'desc' as const }
+      ]
     } else if (status === 'listed') {
       orderBy = { dateRangeEnd: 'desc' }
     } else if (status === 'open' || status === 'upcoming') {
       orderBy = { dateRangeStart: 'desc' }
     } else if (status === 'closed') {
       orderBy = { dateRangeEnd: 'desc' }
+    } else {
+      orderBy = { srNo: 'desc' }
     }
 
     // Get paginated results
