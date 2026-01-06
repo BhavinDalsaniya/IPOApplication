@@ -621,17 +621,17 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
         {/* Pagination Controls */}
         {!loading && pagination.totalPages > 1 && (
           <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-600">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-slate-600 text-center sm:text-left">
                 Showing page <span className="font-bold text-slate-900">{pagination.page}</span> of <span className="font-bold text-slate-900">{pagination.totalPages}</span>
                 <span className="ml-2">({pagination.total} total IPOs)</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <button
                   onClick={() => fetchIPOs(pagination.page - 1)}
                   disabled={pagination.page === 1}
-                  className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:hover:bg-slate-100"
+                  className="px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:hover:bg-slate-100"
                 >
                   Previous
                 </button>
@@ -653,7 +653,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
                       <button
                         key={pageNum}
                         onClick={() => fetchIPOs(pageNum)}
-                        className={`w-10 h-10 text-sm font-bold rounded-lg transition-all duration-200 ${
+                        className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-bold rounded-lg transition-all duration-200 ${
                           pagination.page === pageNum
                             ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md'
                             : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -668,7 +668,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
                 <button
                   onClick={() => fetchIPOs(pagination.page + 1)}
                   disabled={!pagination.hasMore}
-                  className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:hover:bg-slate-100"
+                  className="px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:hover:bg-slate-100"
                 >
                   Next
                 </button>
