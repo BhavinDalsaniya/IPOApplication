@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getCache } from '@/lib/cache'
 
 // GET single IPO
 export async function GET(
@@ -77,6 +78,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const cache = getCache()
     const body = await request.json()
 
     const updateData: any = {}
@@ -122,6 +124,9 @@ export async function PUT(
       data: updateData
     })
 
+    // Invalidate all IPO list caches since data changed
+    await cache.delPattern('ipo:list:*')
+
     return NextResponse.json(ipo)
   } catch (error) {
     console.error('Error updating IPO:', error)
@@ -138,9 +143,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const cache = getCache()
+
     await prisma.iPO.delete({
       where: { id: params.id }
     })
+
+    // Invalidate all IPO list caches since data changed
+    await cache.delPattern('ipo:list:*')
 
     return NextResponse.json({ message: 'IPO deleted successfully' })
   } catch (error) {
