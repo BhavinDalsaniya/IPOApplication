@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getCache, CACHE_TTL } from '@/lib/cache'
 
 // GET all IPOs - with optional filtering and pagination
 export async function GET(request: NextRequest) {
@@ -10,6 +11,28 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
+
+    const cache = getCache()
+
+    // Generate cache key based on filters
+    const cacheKey = cache.generateKey('ipo:list', {
+      status: status || 'all',
+      type: type || 'all',
+      search: search || '',
+      page,
+      limit
+    })
+
+    // Try to get from cache first
+    const cached = await cache.get(cacheKey)
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          'X-Cache': 'HIT',
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120'
+        }
+      })
+    }
 
     const where: any = {}
     if (status) where.status = status
@@ -55,7 +78,7 @@ export async function GET(request: NextRequest) {
       take: limit
     })
 
-    return NextResponse.json({
+    const result = {
       ipos,
       pagination: {
         page,
@@ -63,6 +86,19 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
         hasMore: page * limit < total
+      }
+    }
+
+    // Determine TTL based on whether search is active
+    const ttl = search ? CACHE_TTL.IPO_FILTERED : CACHE_TTL.IPO_LIST
+
+    // Cache the result
+    await cache.set(cacheKey, result, ttl)
+
+    return NextResponse.json(result, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': `public, s-maxage=${ttl}, stale-while-revalidate=${ttl * 2}`
       }
     })
   } catch (error) {
@@ -121,6 +157,7 @@ const parseOfferPrice = (price: string) => {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const cache = getCache()
 
     // Check for duplicate name
     if (body.name) {
@@ -172,6 +209,9 @@ export async function POST(request: NextRequest) {
         description: body.description || null
       }
     })
+
+    // Invalidate all IPO list caches
+    await cache.delPattern('ipo:list:*')
 
     return NextResponse.json(ipo, { status: 201 })
   } catch (error) {

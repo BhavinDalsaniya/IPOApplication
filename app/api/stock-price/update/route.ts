@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { fetchMultipleStockPrices, fetchStockPrice, calculateIPOGain } from '@/lib/stockPrice'
+import { getCache, CACHE_TTL } from '@/lib/cache'
 
 /**
  * API endpoint to update stock prices for all listed IPOs
@@ -8,6 +9,8 @@ import { fetchMultipleStockPrices, fetchStockPrice, calculateIPOGain } from '@/l
  */
 export async function POST(request: NextRequest) {
   try {
+    const cache = getCache()
+
     // Get all listed IPOs with symbols and exchange info
     const ipos = await prisma.iPO.findMany({
       where: {
@@ -117,6 +120,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Invalidate all IPO list caches since prices changed
+    await cache.delPattern('ipo:list:*')
+
     return NextResponse.json({
       message: `Updated ${updatedCount} IPO prices`,
       updated: updatedCount,
@@ -133,10 +139,24 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET - Check when prices were last updated
+ * GET - Check when prices were last updated (with caching)
  */
 export async function GET(request: NextRequest) {
   try {
+    const cache = getCache()
+
+    // Try cache first
+    const cacheKey = 'stock:price:status'
+    const cached = await cache.get(cacheKey)
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          'X-Cache': 'HIT',
+          'Cache-Control': `public, s-maxage=${CACHE_TTL.STOCK_PRICES_BATCH}`
+        }
+      })
+    }
+
     const ipos = await prisma.iPO.findMany({
       where: { status: 'listed' },
       select: {
@@ -151,9 +171,19 @@ export async function GET(request: NextRequest) {
       orderBy: { priceUpdatedAt: 'desc' }
     })
 
-    return NextResponse.json({
+    const result = {
       count: ipos.length,
       ipos
+    }
+
+    // Cache for 2 minutes
+    await cache.set(cacheKey, result, CACHE_TTL.STOCK_PRICES_BATCH)
+
+    return NextResponse.json(result, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': `public, s-maxage=${CACHE_TTL.STOCK_PRICES_BATCH}`
+      }
     })
   } catch (error) {
     console.error('Error fetching price status:', error)

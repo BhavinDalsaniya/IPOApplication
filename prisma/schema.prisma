@@ -45,6 +45,10 @@ model IPO {
   notifications  Notification[]
 
   @@map("ipos")
+  @@index([status, dateRangeEnd], map: "idx_status_date")
+  @@index([type], map: "idx_type")
+  @@index([dateRangeStart], map: "idx_date_start")
+  @@index([updatedAt], map: "idx_updated")
 }
 
 // Price update history log
