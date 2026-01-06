@@ -20,9 +20,9 @@ export default function Home() {
               <Link href="/ipos" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition">
                 Browse IPOs
               </Link>
-              <Link href="/admin" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+              {/* <Link href="/admin" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
                 Admin Dashboard
-              </Link>
+              </Link> */}
             </nav>
           </div>
         </div>
@@ -46,12 +46,12 @@ export default function Home() {
             >
               View All IPOs
             </Link>
-            <Link
+            {/* <Link
               href="/admin"
               className="px-8 py-4 text-lg font-semibold text-slate-700 bg-white rounded-xl hover:bg-slate-50 transition border border-slate-200"
             >
               Admin Panel
-            </Link>
+            </Link> */}
           </div>
         </div>
 

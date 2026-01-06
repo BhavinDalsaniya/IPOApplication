@@ -52,7 +52,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
   const [yearFilter, setYearFilter] = useState('all')
   const [monthFilter, setMonthFilter] = useState('all')
 
-  // Fetch IPOs with filters and pagination
+  // Fetch IPOs with filters, search, and pagination
   const fetchIPOs = async (page: number = 1) => {
     setLoading(true)
     try {
@@ -63,6 +63,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
 
       if (statusFilter !== 'all') params.append('status', statusFilter)
       if (typeFilter !== 'all') params.append('type', typeFilter)
+      if (searchQuery.trim()) params.append('search', searchQuery.trim())
 
       const response = await fetch(`/api/ipos?${params.toString()}`)
       const data = await response.json()
@@ -77,23 +78,14 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
     }
   }
 
-  // Refetch when filters change
+  // Refetch when filters or search changes
   useEffect(() => {
     fetchIPOs(1)
-  }, [statusFilter, typeFilter])
+  }, [statusFilter, typeFilter, searchQuery])
 
-  // Filter and sort IPOs (client-side for search/year/month)
+  // Filter and sort IPOs (client-side for year/month only)
   const filteredIpos = useMemo(() => {
     let filtered = [...ipos]
-
-    // Filter by search
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(ipo =>
-        ipo.name.toLowerCase().includes(query) ||
-        ipo.symbol?.toLowerCase().includes(query)
-      )
-    }
 
     // Filter by year
     if (yearFilter !== 'all') {
@@ -116,7 +108,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
     }
 
     return filtered
-  }, [ipos, searchQuery, yearFilter, monthFilter])
+  }, [ipos, yearFilter, monthFilter])
 
   // Get available years from IPOs - use a separate fetch to get all years
   const availableYears = useMemo(() => {
@@ -389,6 +381,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
             <div className="mt-3 flex items-center justify-between pt-3 border-t border-slate-200">
               <div className="text-xs text-slate-600">
                 Showing <span className="font-semibold text-slate-900">{filteredIpos.length}</span> of <span className="font-semibold text-slate-900">{pagination.total}</span> IPOs
+                {searchQuery && <span className="ml-1">for "{searchQuery}"</span>}
               </div>
               <button
                 onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setSearchQuery(''); setYearFilter('all'); setMonthFilter('all') }}

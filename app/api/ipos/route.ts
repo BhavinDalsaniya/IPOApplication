@@ -7,12 +7,21 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const status = searchParams.get('status')
     const type = searchParams.get('type')
+    const search = searchParams.get('search')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
     const where: any = {}
     if (status) where.status = status
     if (type) where.type = type
+
+    // Add search filter for name or symbol (case-insensitive)
+    if (search && search.trim()) {
+      where.OR = [
+        { name: { contains: search.trim(), mode: 'insensitive' } },
+        { symbol: { contains: search.trim(), mode: 'insensitive' } }
+      ]
+    }
 
     // Get total count for pagination info
     const total = await prisma.iPO.count({ where })
