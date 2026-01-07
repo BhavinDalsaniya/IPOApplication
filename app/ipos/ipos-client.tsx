@@ -162,7 +162,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-violet-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-violet-50/20" style={{ fontSize: '90%' }}>
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-slate-200/50 sticky top-0 z-50">
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-3">
