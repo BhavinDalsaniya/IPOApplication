@@ -25,7 +25,10 @@
       "Bash(git rm:*)",
       "Bash(git update-index:*)",
       "Bash(npx prisma migrate:*)",
-      "Bash(del:*)"
+      "Bash(del:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(start /B npm run dev:*)"
     ]
   }
 }

@@ -125,11 +125,18 @@ export async function PUT(
     })
 
     // Invalidate all IPO list caches since data changed
-    await cache.delPattern('ipo:list:*')
+    try {
+      await cache.delPattern('ipo:list:*')
+    } catch (cacheError) {
+      console.error('Cache invalidation error (non-critical):', cacheError)
+    }
 
     return NextResponse.json(ipo)
   } catch (error) {
     console.error('Error updating IPO:', error)
+    console.error('Update data:', updateData)
+    console.error('IPO ID:', params.id)
+
     return NextResponse.json(
       { error: 'Failed to update IPO', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
