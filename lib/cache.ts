@@ -164,21 +164,20 @@ class CacheService {
     }
 
     // Clear matching memory cache entries
-    for (const key of this.memoryCache.keys()) {
-      if (this.matchPattern(key, pattern)) {
-        this.memoryCache.delete(key)
+    try {
+      const patternRegex = new RegExp(
+        '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
+      )
+      for (const key of this.memoryCache.keys()) {
+        if (patternRegex.test(key)) {
+          this.memoryCache.delete(key)
+        }
       }
+    } catch (error) {
+      // If pattern matching fails, just clear all memory cache
+      console.error('Memory cache pattern matching error, clearing all:', error)
+      this.memoryCache.clear()
     }
-  }
-
-  /**
-   * Simple pattern matching for memory cache
-   */
-  private matchPattern(key: string, pattern: string): boolean {
-    const regex = new RegExp(
-      '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
-    )
-    return regex.test(key)
   }
 
   /**
