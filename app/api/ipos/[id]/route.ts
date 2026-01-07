@@ -77,12 +77,11 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const cache = getCache()
+  const body = await request.json()
+  const updateData: any = {}
+
   try {
-    const cache = getCache()
-    const body = await request.json()
-
-    const updateData: any = {}
-
     if (body.srNo !== undefined) updateData.srNo = parseInt(body.srNo) || 0
     if (body.name !== undefined) updateData.name = body.name
     if (body.symbol !== undefined) updateData.symbol = body.symbol
@@ -136,6 +135,14 @@ export async function PUT(
     console.error('Error updating IPO:', error)
     console.error('Update data:', updateData)
     console.error('IPO ID:', params.id)
+
+    // Check if it's a unique constraint error on symbol
+    if (error instanceof Error && error.message.includes('unique constraint') && error.message.includes('symbol')) {
+      return NextResponse.json(
+        { error: 'This symbol is already used by another IPO. Please use a different symbol.' },
+        { status: 400 }
+      )
+    }
 
     return NextResponse.json(
       { error: 'Failed to update IPO', details: error instanceof Error ? error.message : 'Unknown error' },
