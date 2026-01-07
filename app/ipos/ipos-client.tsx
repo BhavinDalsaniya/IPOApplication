@@ -462,7 +462,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
 
                         {/* IPO Name */}
                         <td className="px-4 py-3 text-sm font-semibold text-slate-900 max-w-[180px]">
-                          <div className="leading-tight" title={ipo.name}>
+                          <div className="leading-tight line-clamp-2" title={ipo.name}>
                             {ipo.name}
                           </div>
                         </td>
