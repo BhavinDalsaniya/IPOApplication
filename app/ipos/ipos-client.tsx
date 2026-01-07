@@ -479,7 +479,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
                         </td>
 
                         {/* Date Range */}
-                        <td className="px-4 py-3 text-sm text-slate-600 tabular-nums font-medium">
+                        <td className="px-4 py-3 text-xs text-slate-600 tabular-nums font-medium">
                           {ipo.dateRangeStart || ipo.dateRangeEnd ? (
                             <div className="leading-tight">
                               <div>{formatDate(ipo.dateRangeStart)}</div>
