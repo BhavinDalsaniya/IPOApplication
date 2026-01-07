@@ -604,9 +604,18 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
 
                         {/* Status */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`inline-flex items-center overflow-hidden ${getStatusColor(ipo.status)}`}>
+                          <span
+                            className={`inline-flex items-center justify-center min-w-[6rem] overflow-hidden ${getStatusColor(ipo.status)}`}
+                            title={ipo.status.charAt(0).toUpperCase() + ipo.status.slice(1)}
+                          >
                             <span dangerouslySetInnerHTML={{ __html: getStatusIcon(ipo.status) }} />
-                            {ipo.status.charAt(0).toUpperCase() + ipo.status.slice(1)}
+                            {(() => {
+                              const status = ipo.status
+                              const displayStatus = status.charAt(0).toUpperCase() + status.slice(1)
+                              return displayStatus.length <= 6
+                                ? displayStatus
+                                : displayStatus.slice(0, 6) + '...'
+                            })()}
                           </span>
                         </td>
                       </tr>
