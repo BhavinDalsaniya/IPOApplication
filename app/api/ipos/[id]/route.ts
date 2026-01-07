@@ -84,7 +84,7 @@ export async function PUT(
   try {
     if (body.srNo !== undefined) updateData.srNo = parseInt(body.srNo) || 0
     if (body.name !== undefined) updateData.name = body.name
-    if (body.symbol !== undefined) updateData.symbol = body.symbol
+    if (body.symbol !== undefined) updateData.symbol = body.symbol || null  // Convert empty string to null
     if (body.description !== undefined) updateData.description = body.description || null
     if (body.exchange !== undefined) updateData.exchange = body.exchange || null
     if (body.token !== undefined) updateData.token = body.token || null
