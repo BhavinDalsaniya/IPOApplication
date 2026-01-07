@@ -555,13 +555,25 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                   onChange={(e) => {
                     const newOfferPrice = e.target.value
                     setFormData({ ...formData, offerPrice: newOfferPrice })
+
+                    const parts = newOfferPrice.split('-')
+                    const offerPriceMax = parseFloat(parts[1]?.trim() || parts[0]?.trim() || '0')
+
+                    // Recalculate Listing Gain % if Listing Price exists
                     if (formData.listingPrice) {
-                      const parts = newOfferPrice.split('-')
-                      const offerPriceMax = parseFloat(parts[1]?.trim() || parts[0]?.trim() || '0')
                       const listingPrice = parseFloat(formData.listingPrice)
                       if (listingPrice && offerPriceMax) {
                         const gainPercent = ((listingPrice - offerPriceMax) / offerPriceMax) * 100
                         setFormData(prev => ({ ...prev, offerPrice: newOfferPrice, listingGainPercent: gainPercent.toFixed(2) }))
+                      }
+                    }
+
+                    // Recalculate GMP % if GMP exists
+                    if (formData.gmp) {
+                      const gmp = parseFloat(formData.gmp)
+                      if (gmp && offerPriceMax) {
+                        const gmpPercent = (gmp / offerPriceMax) * 100
+                        setFormData(prev => ({ ...prev, offerPrice: newOfferPrice, gmpPercent: gmpPercent.toFixed(2) }))
                       }
                     }
                   }}
@@ -595,7 +607,20 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                   step="0.01"
                   placeholder="e.g., 120"
                   value={formData.gmp}
-                  onChange={(e) => setFormData({ ...formData, gmp: e.target.value })}
+                  onChange={(e) => {
+                    const gmpValue = e.target.value
+                    setFormData({ ...formData, gmp: gmpValue })
+                    const gmp = parseFloat(gmpValue)
+                    const offerPriceMax = getOfferPriceMax()
+
+                    // Auto-calculate GMP % when GMP changes
+                    if (gmp && offerPriceMax) {
+                      const gmpPercent = (gmp / offerPriceMax) * 100
+                      setFormData(prev => ({ ...prev, gmp: gmpValue, gmpPercent: gmpPercent.toFixed(2) }))
+                    } else if (!gmpValue) {
+                      setFormData(prev => ({ ...prev, gmp: gmpValue, gmpPercent: '' }))
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
               </div>
@@ -606,7 +631,20 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
                   step="0.01"
                   placeholder="e.g., 5.26"
                   value={formData.gmpPercent}
-                  onChange={(e) => setFormData({ ...formData, gmpPercent: e.target.value })}
+                  onChange={(e) => {
+                    const gmpPercentValue = e.target.value
+                    setFormData({ ...formData, gmpPercent: gmpPercentValue })
+                    const gmpPercent = parseFloat(gmpPercentValue)
+                    const offerPriceMax = getOfferPriceMax()
+
+                    // Auto-calculate GMP when GMP % changes
+                    if (gmpPercent !== null && gmpPercent !== undefined && offerPriceMax) {
+                      const gmp = (offerPriceMax * gmpPercent) / 100
+                      setFormData(prev => ({ ...prev, gmpPercent: gmpPercentValue, gmp: gmp.toFixed(2) }))
+                    } else if (!gmpPercentValue) {
+                      setFormData(prev => ({ ...prev, gmpPercent: gmpPercentValue, gmp: '' }))
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
               </div>
