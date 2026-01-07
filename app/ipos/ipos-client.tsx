@@ -614,7 +614,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
                               const displayStatus = status.charAt(0).toUpperCase() + status.slice(1)
                               return displayStatus.length <= 6
                                 ? displayStatus
-                                : displayStatus.slice(0, 6) + '...'
+                                : displayStatus.slice(0, 4) + '..'
                             })()}
                           </span>
                         </td>
