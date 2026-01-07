@@ -123,7 +123,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
   const formatDate = (date: string | null) => {
     if (!date) return '-'
     const d = new Date(date)
-    const day = d.getDate()
+    const day = d.getDate().toString().padStart(2, '0')
     const month = d.toLocaleDateString('en-IN', { month: 'short' })
     const year = d.getFullYear().toString().slice(-2)
     return `${day} ${month}'${year}`
@@ -479,7 +479,7 @@ export default function IPOsClient({ initialIpos, initialPagination }: IPOsClien
                         </td>
 
                         {/* Date Range */}
-                        <td className="px-4 py-3 text-sm text-slate-600 font-medium">
+                        <td className="px-4 py-3 text-sm text-slate-600 tabular-nums font-medium">
                           {ipo.dateRangeStart || ipo.dateRangeEnd ? (
                             <div className="leading-tight">
                               <div>{formatDate(ipo.dateRangeStart)}</div>
