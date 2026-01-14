@@ -75,9 +75,8 @@ async function getIPOs(page: number = 1, limit: number = 20): Promise<{
   }
 }
 
-// ISR: Revalidate page every 5 minutes
-// This allows serving static pages that update in background
-export const revalidate = 300
+// Disable ISR to always show fresh data from database
+// Page is fully dynamic - always fetches fresh data on each request
 export const dynamic = 'force-dynamic'
 
 export default async function IPOsPage() {
