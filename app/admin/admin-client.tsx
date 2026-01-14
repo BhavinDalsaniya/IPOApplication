@@ -36,6 +36,7 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [updatingPrices, setUpdatingPrices] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [formData, setFormData] = useState({
@@ -143,12 +144,24 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
 
   const fetchIPOs = async () => {
     try {
-      const response = await fetch('/api/ipos')
+      const response = await fetch('/api/ipos?_t=' + Date.now(), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       const data = await response.json()
       setIpos(data.ipos || data)
     } catch (error) {
       console.error('Error fetching IPOs:', error)
     }
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await fetchIPOs()
+    setTimeout(() => setRefreshing(false), 500)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -308,6 +321,29 @@ export default function AdminClient({ initialIpos }: AdminClientProps) {
               <Link href="/ipos" className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition shadow-sm">
                 View Public Page
               </Link>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition disabled:opacity-50 shadow-lg shadow-blue-500/30 flex items-center gap-2"
+                title="Refresh IPO list from server"
+              >
+                {refreshing ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh
+                  </>
+                )}
+              </button>
               <button
                 onClick={handleUpdatePrices}
                 disabled={updatingPrices}

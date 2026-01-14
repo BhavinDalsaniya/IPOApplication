@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(cached, {
         headers: {
           'X-Cache': 'HIT',
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120'
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Pragma': 'no-cache'
         }
       })
     }
@@ -98,7 +99,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result, {
       headers: {
         'X-Cache': 'MISS',
-        'Cache-Control': `public, s-maxage=${ttl}, stale-while-revalidate=${ttl * 2}`
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache'
       }
     })
   } catch (error) {
